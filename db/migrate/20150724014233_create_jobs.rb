@@ -12,9 +12,10 @@ class CreateJobs < ActiveRecord::Migration
       t.text :holiday
       t.text :treatment
       t.text :raw_html
-      t.text :url
       t.text :content
+      t.text :url
       t.references :company
+      t.integer :worker
 
       t.timestamps null: false
     end

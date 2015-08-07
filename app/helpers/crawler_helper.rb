@@ -35,7 +35,7 @@ module CrawlerHelper
         end
       rescue => e
         list_page_error += 1
-        puts "Get list page error #{list_page_error} : " + " #{e}!"
+        write_error_to_file "get_list_job_link", list_page_error, e
       end
     end
 
@@ -54,7 +54,7 @@ module CrawlerHelper
           end
         rescue => e
           job_url_error += 1
-          puts "Get lob detail url #{job_url_error} : " + " #{e}!"
+          write_error_to_file "get_job_detail_url", job_url_error, e
         end
       end
     end
@@ -69,7 +69,7 @@ module CrawlerHelper
         string += ","
       else
         string += object.text.squish
-      end   
+      end
     end
     return string
   end
@@ -97,8 +97,8 @@ module CrawlerHelper
 
   def parse_full_address raw_address
     full_address = ""
-    if Settings.regular.address.multiple.a.match(raw_address).present? && Settings.regular.address.multiple.a.match(raw_address)[1].present?
-      full_address = Settings.regular.address.multiple.a.match(raw_address)[1].to_s.strip
+    if Settings.regular.address.multiple.e.match(raw_address).present? && Settings.regular.address.multiple.e.match(raw_address)[1].present?
+      full_address = Settings.regular.address.multiple.e.match(raw_address)[1].to_s.strip
     elsif Settings.regular.address.multiple.b.match(raw_address).present? && Settings.regular.address.multiple.b.match(raw_address)[1].present?
       full_address = Settings.regular.address.multiple.b.match(raw_address)[1].to_s.strip
     elsif /^.+：(.*)\/.*：/.match(raw_address).present?
@@ -109,52 +109,63 @@ module CrawlerHelper
     return full_address
   end
 
-  def parse_table_info job_detail_page
-    table_array = ["", "", "", "", "", "", "", "", ""]
+  def parse_home_and_tel job_detail_page
+    arr = ["", ""]
     if job_detail_page.search("table tr").present?
       rows = job_detail_page.search("table tr")
       rows.each do |row|
-        if row.search("td p.txt_area").present? || row.search("td p").present?
-          if row.search("th").present?
-            case row.search("th").text.strip
-            when Settings.content
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[0] = row.search("td p.txt_area").text.strip
-            when Settings.mechanize.requirement
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[1] = row.search("td p.txt_area").text.strip
-            when Settings.workplace
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[2] = row.search("td p.txt_area").text.strip
-            when Settings.work_time
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[3] = row.search("td p.txt_area").text.strip
-            when Settings.salary
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[4]  = row.search("td p.txt_area").text.strip
-            when Settings.mechanize.treatment
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[5] = row.search("td p.txt_area").text.strip
-            when Settings.mechanize.holiday
-              convert_new_line row.search("td p.txt_area").children 
-              table_array[6] = row.search("td p.txt_area").text.strip
-            when Settings.mechanize.full_tel
-              convert_new_line row.search("td p").children
-              table_array[7] = row.search("td p").text.strip
-            when Settings.mechanize.home_page
-              convert_new_line row.search("td p").children
-              table_array[8] = row.search("td p").text.strip
-            end
+        if row.search("th").present? && row.search("td p").present?
+          case row.search("th").text.strip
+          when Settings.mechanize.home_page 
+            convert_new_line row.search("td p").children
+            arr[0] = row.search("td p").text.strip
+          when Settings.mechanize.full_tel
+            convert_new_line row.search("td p").children
+            arr[1] = row.search("td p").text.strip
           end
         end
       end
     end
+    return arr
+  end
 
+  def parse_table_info job_detail_page
+    table_array = ["", "", "", "", "", "", ""]
+    if job_detail_page.search("table tr").present?
+      rows = job_detail_page.search("table tr")
+      rows.each do |row|
+        if row.search("th").present? && row.search("td p.txt_area").present?
+          case row.search("th").text.strip
+          when Settings.content
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[0] = row.search("td p.txt_area").text.strip
+          when Settings.mechanize.requirement
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[1] = row.search("td p.txt_area").text.strip
+          when Settings.workplace
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[2] = row.search("td p.txt_area").text.strip
+          when Settings.work_time
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[3] = row.search("td p.txt_area").text.strip
+          when Settings.salary
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[4]  = row.search("td p.txt_area").text.strip
+          when Settings.mechanize.treatment
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[5] = row.search("td p.txt_area").text.strip
+          when Settings.mechanize.holiday
+            convert_new_line row.search("td p.txt_area").children 
+            table_array[6] = row.search("td p.txt_area").text.strip
+          end
+        end
+      end
+    end
     return table_array
   end
 
   def parse_right_block job_detail_page
-    right_array = ["", "", ""]
+    right_array = ["", "", "", ""]
     job_detail_page.search("div.rightBlock dl.clr").each do |right|
       if right.search("dd").present? && right.search("dt").present?
         case right.search("dt").text.strip
@@ -162,8 +173,10 @@ module CrawlerHelper
           right_array[0] = right.search("dd").text.squish
         when Settings.mechanize.employees_number
           right_array[1] = right.search("dd").text.squish
-        when Settings.mechanize.sales
+        when Settings.mechanize.capital
           right_array[2] = right.search("dd").text.squish
+        when Settings.mechanize.sales
+          right_array[3] = right.search("dd").text.squish
         end
       end
     end
@@ -180,7 +193,6 @@ module CrawlerHelper
         end
       end
     end
-
     return raw_address
   end
 

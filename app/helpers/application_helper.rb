@@ -26,30 +26,64 @@ module ApplicationHelper
     end
   end
 
+  def reset_error_log
+    file = File.open("thieving_error_log", "w")
+    file.write("")
+  end
+
+  def write_error_to_file error, count, text
+    file = File.open("thieving_error_log", "a+")
+    file.write("#{error} error #{count}: " + " #{text}!\n")
+  end
+
   def remove_space_in_text str
-    str.delete(" ")
+    if str.present?
+      str.delete! Settings.space
+    end
+    str
   end
 
   def parse_postal_code str
-    raw = str.scan(/〒?([０-９0-9[-－‐]{1}]{8}\s?)/).join("/").squish
-    raw_postal_code = remove_space_in_text raw
-    raw_postal_code.delete("^0-9０-９/")
+    if str.present?
+      raw_postal_code = str.scan(/〒?([０-９0-9[-－‐]{1}]{8}\s?)/).join("/")
+      str = raw_postal_code.delete("^0-9０-９/")
+    end
+    str
+  end
+
+  def handle_general_text str
+    if str.present?
+      converter = Itaiji::Converter.new
+      str.delete! Settings.space
+      str = str.han_to_zen
+      str = converter.convert_seijitai str
+    end
+    str
+  end
+
+  def convert_company_name str
+    if str.present?
+      str.delete! Settings.strange
+      str = str.mb_chars.upcase.to_s
+      str = str.katakana
+    end
+    str
   end
 
   def parse_tel_number full_tel
     raw_tel = ""
-    if /[FＦ]\s?[AＡ]\s?[XＸ]/i.match(full_tel).present? || /ファクシミリ/.match(full_tel).present?
-      if /[ＴＥＬTELtel電話]+\D*([[0-9０-９]+[-\(][0-9０-９]+[-\)][0-9０-９]+]{9,13})+/i.match(full_tel).present?
-        raw_tel = full_tel.scan(/[ＴＥＬTELtel電話]+\D*([[0-9０-９]+[-\(][0-9０-９]+[-\)][0-9０-９]+]{9,13})+/i).join("/")
-      elsif /([[0０]([0-9０-９]+[-－]?[0-9０-９]+[-－]?[0-9０-９]+)]{9,13})+\s*[\(（]\s*[TＴ]\s?[EＥ]\s?[LＬ]/i.match(full_tel).present?
-        raw_tel = full_tel.scan(/([[0０]([0-9０-９]+[-－]?[0-9０-９]+[-－]?[0-9０-９]+)]{9,13})+\s*[\(（]\s*[TＴ]\s?[EＥ]\s?[LＬ]/i).join("/")
+    if /Ｆ\s?Ａ\s?Ｘ\s?/i.match(full_tel).present? || /ファクシミリ/.match(full_tel).present?
+      if /[ＴＥＬ電話]+\D*([[０-９]+[-\(][０-９]+[-\)][０-９]+]{9,13})+/i.match(full_tel).present?
+        raw_tel = full_tel.scan(/[ＴＥＬ電話]+\D*([[０-９]+[-\(][０-９]+[-\)][０-９]+]{9,13})+/i).join("／")
+      elsif /([[０]([０-９]+[-－]?[０-９]+[-－]?[０-９]+)]{9,13})+\s*[\(（]\s*[Ｔ]\s?[Ｅ]\s?[Ｌ]/i.match(full_tel).present?
+        raw_tel = full_tel.scan(/([[０]([０-９]+[-－]?[０-９]+[-－]?[０-９]+)]{9,13})+\s*[\(（]\s*[Ｔ]\s?[Ｅ]\s?[Ｌ]/i).join("／")
       end
     else
-      if /([0０][([0-9０-９]+[-－‐\(（]?[0-9０-９]+[-－‐\)）]?[0-9０-９]+)]{8,12})/.match(full_tel).present?
-        raw_tel = full_tel.scan(/([0０][([0-9０-９]+[-－‐\(（]?[0-9０-９]+[-－‐\)）]?[0-9０-９]+)]{8,12})/).join("/")
+      if /([０][([０-９]+[-－‐\(（]?[０-９]+[-－‐\)）]?[０-９]+)]{8,12})/.match(full_tel).present?
+        raw_tel = full_tel.scan(/([0０][([０-９]+[-－‐\(（]?[０-９]+[-－‐\)）]?[０-９]+)]{8,12})/).join("／")
       end
     end
-    tel = raw_tel.delete("^0-9０-９/")
+    raw_tel.delete "^０-９／"
   end
 
   def parse_address34 full_address
@@ -85,7 +119,7 @@ module ApplicationHelper
         end
       end
     end
-    raw_address34 = [address34, address3, address4]
+    [address34, address3, address4]
   end
 
   def parse_address34_exception full_address, regx_value
@@ -112,10 +146,111 @@ module ApplicationHelper
         address3 = regx34.match(address34)[1].to_s.squish if regx34.match(address34)[1].present?
         if regx34.match(address34)[3].present?
           raw_address4 = regx34.match(address34)[3].to_s.strip
-          address4 = address3and4(full_address)[2].to_s.squish
+          address4 = parse_address34(full_address)[2].to_s.squish
         end
       end
     end
-    raw_address34 = [address34, address3, address4]
+    [address34, address3, address4]
+  end
+
+  def convert_floor str
+    if str.present?
+      str.gsub "Ｆ","階"
+    end
+    str
+  end
+
+  def convert_home_page url
+    if url.present?
+      url = url.gsub(/／$/, "").gsub("ｗｗｗ．", "")
+      if Settings.regular.home_page.match(url).present?
+        url = url.gsub Settings.regular.home_page, ""
+      end
+    end
+    url
+  end
+
+  def check_existed_company hash
+    mark = []
+    dup = []
+    if hash[:convert_name].present? && Company.exists?(convert_name: hash[:convert_name])
+      companies = Company.where convert_name: hash[:convert_name] 
+      companies.each_with_index do |company, num|
+        mark[num] = 2
+        mark[num] += check_duplicate_home_page company, hash[:home_page] # 2/0.5
+        mark[num] += check_duplicate_tel company, hash[:tel] # 0.5/1/1.5
+        mark[num] += check_duplicate_address(company, hash[:address1],
+                              hash[:address2], hash[:address3], hash[:address4]) # 0.5/1/1.5/2
+        if mark[num] >= 4.5
+          dup = [mark[num], company.id]
+        end
+      end
+    elsif hash[:home_page].present? && Company.exists?(home_page: hash[:home_page])
+      companies = Company.where home_page: hash[:home_page]
+      companies.each_with_index do |company, num|
+        mark[num] = 2
+        mark[num] += check_duplicate_tel company, hash[:tel] # 0.5/1/1.5
+        mark[num] += check_duplicate_address(company, hash[:address1], 
+                              hash[:address2], hash[:address3], hash[:address4]) # 0.5/1/1.5/2
+
+        if mark[num] >= 3.5
+          dup = [mark[num], company.id]
+        end
+      end
+    end
+    dup
+  end
+
+
+  def check_duplicate_address company, address1, address2, address3, address4
+    mark = 0
+    if company.address1 == address1
+      mark += 0.5
+      if company.address2 == address2
+        mark += 0.5
+        if company.address3 == address3
+          mark += 0.5
+          if company.address4 == address4
+            mark += 0.5
+          end
+        end
+      end
+    end
+    mark
+  end
+
+  def check_duplicate_home_page company, home_page
+    mark = 0
+    if home_page.blank? && home_page == company.home_page
+      mark += 0.5
+    elsif home_page.present? && home_page == company.home_page
+      mark += 2
+    end
+    mark
+  end
+
+  def check_duplicate_tel company, phone
+    mark = 0
+    if phone.blank? && phone == company.tel
+      mark += 0.5
+    elsif phone.present?
+      dem = 0
+      phones_array = phone.split("／")
+      phones_array.each do |t|
+        if company.tel.present? && company.tel.include?(t)
+          dem += 1
+        end
+      end
+      if 3 * dem < 2 * phones_array.count
+        mark += 1
+      else
+        mark += 1.5
+      end
+    end
+    mark
+  end
+
+  def get_business_category_for_company
+
   end
 end

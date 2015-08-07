@@ -1,14 +1,17 @@
-number_worker: 10
+number_worker: 5
+page_per_job: 4
 regular:
+  home_page: !ruby/regexp /／[^／]*ｉｎｄｅｘ(.*)．(ａｓｐ|ｓ?ｈｔｍｌ?|ｐｈｐ)$/
   address:
     multiple: 
       a: !ruby/regexp /^〒(.*?)\s?／?\s?〒.*/
       b: !ruby/regexp /^[\[＜【].*本?社?[】＞\]](.*?)\s?／?\s?[\[＜【].*[】＞\]].*/
       c: !ruby/regexp /^.+：(.*)\/.*：/
       d: !ruby/regexp /^(〒[０-９0-9]+[－-][０-９0-9]+\s?+(〒[０-９0-9]+[－‐][０-９0-9]+\s?)+.*)/
+      e: !ruby/regexp /^〒?(\s?[０-９0-9[-－‐]{1}]{8}\s*[\p{Hiragana}\p{Katakana}\p{Han}[／]]+[^〒])\s*[^〒]*/
     # address1and2: !ruby/regexp /^〒?([\d-]*)?(.+?[都|道|府|県])?(.+?[市|区|町|村])?(.*)$/
     # address1and2: !ruby/regexp /^〒?([\d-]*)?(.+?[都|道|府|県])?(.+?[市|区|町|村])?(.*)$/
-    address1and2: !ruby/regexp /^(〒?[０-９0-9[-－‐]{1}]{8}\s*[〒?[０-９0-9[-－‐]{1}]{8}\s*]+)
+    address1and2: !ruby/regexp /^〒?([０-９0-9[-－‐]{1}]{8}\s*[〒?[０-９0-9[-－‐]{1}]{8}\s*]+)?
                   (.+?[都|道|府|県])?(.+?[市|区|町|村])?(.*)$/x
     address3and4: !ruby/regexp /^(\W+[０-９0-9一-十]+\D+[０-９0-9一-十][[－-][０-９0-9一-十]]*番?地?\d*号?
       |\W+[0-9０-９一-十]?+丁目[0-9０-９一-十]+\s*番?地?[0-9０-９一-十]+号
@@ -19,8 +22,9 @@ regular:
       ([\(（【]本[社店部][】）\)]|[\(（【]総合受付[】）\)])?(.*)$/x
     address34exception: !ruby/regexp /^(\W+[０-９0-9一-十]+[[－-][０-９0-9一-十]]*[－-][０-９0-9一-十]+)\D(\d+F+.*)/
     address4:
-      end_string: !ruby/regexp /(.*)([\(（【].*[本支][社店部][】）\)]|[\(（【]総合受付[】）\)])$/
+      end_string: !ruby/regexp /(.*)([\(（【].*[本支][社店部][】）\)]|[\(（【]総合受付[】）\)]|／[本支][社店部]|／)$/
       bracket: !ruby/regexp /^（?(.*?)[（【\(＜\[](.*)[】＞\)）\]](.*)/
+  postal_code: !ruby/regexp /〒?([０-９0-9[-－‐]{1}]{8}\s?)/
 export_file:
   company_id: "企業ID"
   company_name: "企業名"
@@ -56,6 +60,7 @@ mechanize:
   home_page: "企業HP"
   establishment: "設立"
   employees_number: "従業員数"
+  capital: "資本金"
   sales: "売上高"
   job_category: "職種"
 content: "仕事内容"
@@ -63,3 +68,9 @@ work_time: "勤務時間"
 salary: "給与"
 workplace: "勤務地"
 business_category: "業種"
+space: " "
+html:
+  br: "br"
+  p: "p"
+  n: "\n"
+strange: "　＋ー、。,.･・－‐．～：！【】（）「」／＜＞()，≪≫［］『』※"

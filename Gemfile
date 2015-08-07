@@ -20,6 +20,9 @@ gem "sidekiq", "~> 3.4.2"
 gem "redis-rails", "~> 4.0.0"
 gem "rails_config"
 
+gem 'mojinizer', '~> 0.2.2'
+gem 'itaiji', '~> 0.1.4'
+
 group :development, :test do
   gem "byebug"
   gem "web-console", "~> 2.0"

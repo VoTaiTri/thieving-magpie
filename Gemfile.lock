@@ -64,6 +64,7 @@ GEM
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.7.0)
+    itaiji (0.1.4)
     jbuilder (2.3.1)
       activesupport (>= 3.0.0, < 5)
       multi_json (~> 1.2)
@@ -88,6 +89,9 @@ GEM
     mime-types (2.6.1)
     mini_portile (0.6.2)
     minitest (5.7.0)
+    moji (1.6)
+    mojinizer (0.2.2)
+      moji (~> 1.6)
     multi_json (1.11.2)
     mysql2 (0.3.18)
     net-http-digest_auth (1.4)
@@ -201,9 +205,11 @@ PLATFORMS
 DEPENDENCIES
   byebug
   coffee-rails (~> 4.1.0)
+  itaiji (~> 0.1.4)
   jbuilder (~> 2.0)
   jquery-rails
   mechanize (~> 2.7.3)
+  mojinizer (~> 0.2.2)
   mysql2
   rails (= 4.2.0)
   rails_config
