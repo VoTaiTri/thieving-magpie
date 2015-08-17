@@ -36,13 +36,6 @@ module ApplicationHelper
     file.write("#{error} error #{count}: " + " #{text}!\n")
   end
 
-  def remove_space_in_text str
-    if str.present?
-      str.delete! Settings.space
-    end
-    str
-  end
-
   def parse_postal_code str
     if str.present?
       raw_postal_code = str.scan(/〒?([０-９0-9[-－‐]{1}]{8}\s?)/).join("/")
@@ -53,9 +46,9 @@ module ApplicationHelper
 
   def handle_general_text str
     if str.present?
-      converter = Itaiji::Converter.new
-      str.delete! Settings.space
+      str = str.delete Settings.space
       str = str.han_to_zen
+      converter = Itaiji::Converter.new
       str = converter.convert_seijitai str
     end
     str
@@ -63,9 +56,74 @@ module ApplicationHelper
 
   def convert_company_name str
     if str.present?
-      str.delete! Settings.strange
+      str = str.delete Settings.strange
       str = str.mb_chars.upcase.to_s
       str = str.katakana
+
+      if /(^（株）.*|^㈱.*|^（有）.*|^㈲.*|.*（株）$|.*㈱$|.*（有）$|.*㈲$)/.match(str).present?
+        str = str.gsub /(^（株）|^㈱|（株）$|㈱$)/, "株式会社"
+        str = str.gsub /(^（有）|^㈲|（有）$|㈲$)/, "有限会社"
+      end
+
+      byebug
+
+      if /(【[^】]+】|『[^』]+』|「[^」]+」|（[^）]+）|≪[^≫]+≫|＜[^＞]+＞)/.match(str).present?
+        arr = str.scan /(【[^】]+】|『[^』]+』|「[^」]+」|（[^）]+）|≪[^≫]+≫|＜[^＞]+＞)/
+        raw = "" + str
+
+        arr.each {|x| raw.gsub! x[0], ""}
+
+        arr.each do |a|
+          raw_a = a[0].delete "(【】『』「」（）≪≫＜＞"
+          if /([^／：]*)[／：]/.match(raw_a).present?
+            arr1 = raw_a.scan /([^／：]*)[／：]*/
+            arr1.each do |a1|
+              if a1[0].blank? || /有限会社|株式会社/.match(a1[0]).nil?
+                a1[0] = ""
+              end
+            end
+            if arr1.join.present?
+              raw_a = "（" + arr1.join + "）"
+            else
+              raw_a = ""
+            end
+          elsif /有限会社|株式会社/.match(raw_a).present?
+            raw_a = "（" + raw_a + "）"
+          else
+            raw_a = ""
+          end
+          str.gsub! a[0], raw_a
+        end
+      end
+
+      byebug
+
+      if /([^／：]*)[／：]/.match(str).present?
+        raw_str = []
+        i = 0
+        byebug
+        arr = str.scan(/([^／：]*)[／：]*/)
+
+        arr.each do |a|
+          if a[0].blank? || /有限会社|株式会社/.match(a[0]).nil?
+            a[0] = ""
+          elsif /(（[^）]+）)/.match(a[0]).present?
+            raw = a[0].gsub /(（[^）]+）)/, ""
+            if /有限会社|株式会社/.match(raw).present?
+              a[0] = raw
+            else
+              b = a[0].scan /(（[^）]+）)/
+              byebug
+              a[0] = b.join.delete "（）"
+              # a[0].delete! "（）"
+            end
+          end
+          raw_str[i] = a[0]
+          i += 1
+        end
+        str = raw_str.join.delete "（）"
+      end
+
     end
     str
   end
@@ -250,7 +308,12 @@ module ApplicationHelper
     mark
   end
 
-  def get_business_category_for_company
-
+  def get_business_category_for_company company, job_business_category
+    if company.business_category.present?
+      raw_business_category = company.business_category + "," + job_business_category
+    else
+      raw_business_category = job_business_category
+    end
+    raw_business_category.split(",").uniq.join(",")
   end
 end

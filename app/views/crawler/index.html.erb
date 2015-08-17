@@ -1,4 +1,8 @@
-<%= link_to "Crawler", crawler_web_path %></br>
+<%= form_tag("crawler_web", method: "get") do %>
+  <%= select :source, params[:source], Settings.option_crawler %>
+  <%= submit_tag "Crawler" %>
+<% end %>
+
 <%= link_to "Export", export_file_path(format: :xlsx ) %></br>
 <%= @jobs.count %> Job</br>
 <%= @companies.count %> Company</br>

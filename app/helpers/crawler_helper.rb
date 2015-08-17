@@ -14,11 +14,7 @@ module CrawlerHelper
   end
 
   def get_list_job_link workpage, start_page, finish_page
-    if start_page == 1
-      list_job_link = workpage.search("p.left_btn a").map {|link| link["href"]}
-    else
-      list_job_link = []
-    end
+    list_job_link = (start_page == 1)? workpage.search("p.left_btn a").map {|link| link["href"]} : []
 
     list_page_error = 0
     

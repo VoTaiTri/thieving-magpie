@@ -1,5 +1,5 @@
-number_worker: 5
-page_per_job: 4
+number_worker: 1
+page_per_job: 1
 regular:
   home_page: !ruby/regexp /／[^／]*ｉｎｄｅｘ(.*)．(ａｓｐ|ｓ?ｈｔｍｌ?|ｐｈｐ)$/
   address:
@@ -68,9 +68,11 @@ work_time: "勤務時間"
 salary: "給与"
 workplace: "勤務地"
 business_category: "業種"
-space: " "
+space: " 　"
 html:
   br: "br"
   p: "p"
   n: "\n"
-strange: "　＋ー、。,.･・－‐．～：！【】（）「」／＜＞()，≪≫［］『』※"
+strange: "　＋ー、。,.･・－‐．～：！※＆"
+bracket: "【】（）「」／＜＞()，≪≫［］『』"
+option_crawler: [["Doda", "doda"],["Ecareer", "ecareer"]]

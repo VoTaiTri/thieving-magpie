@@ -8,7 +8,8 @@ class DodaWorker
     workpage = get_work_page_doda
     
     lists = get_list_job_link workpage, start, finish
-   
+    
+    # lists = ["http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001020763/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/"]
     error_counter = 0
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
@@ -37,7 +38,9 @@ class DodaWorker
           if detail_page.search("div.main_ttl_box h1").present?
             company_name = detail_page.search("div.main_ttl_box h1").text.squish
             companies_hash[:name] = handle_general_text company_name
+            # byebug
             companies_hash[:convert_name] = convert_company_name companies_hash[:name]
+            byebug
           end
 
           home_tel = parse_home_and_tel detail_page
@@ -119,12 +122,7 @@ class DodaWorker
           if check.present?
             jobs_hash[:company_id] = check[1]
             company = Company.find_by id: check[1]
-            if company.business_category.present?
-              raw_business_category = company.business_category + "," + jobs_hash[:business_category]
-            else
-              raw_business_category = jobs_hash[:business_category]
-            end
-            business_category = raw_business_category.split(",").uniq.join(",")
+            business_category = get_business_category_for_company company, jobs_hash[:business_category]
             company.update_attributes business_category: business_category
           else
             companies_hash[:url] = detail_url
@@ -135,7 +133,7 @@ class DodaWorker
             companies_hash[:capital] = right[2]
             companies_hash[:sales] = right[3]
             company = Company.new companies_hash
-            company.save!
+            # company.save!
 
             jobs_hash[:company_id] = company.id
           end
@@ -155,7 +153,7 @@ class DodaWorker
           jobs_hash[:inexperience] = parse_experience detail_page
 
           job = Job.new jobs_hash
-          job.save!
+          # job.save!
           # job_state = detail_page.search("div.main_ttl_box p img") - detail_page.search("div.main_ttl_box p.ico_box01 img")
           # array_state = job_state.map {|state| state["alt"]}
         end
