@@ -1,4 +1,4 @@
-module CrawlerHelper
+module DodaHelper
   require "mechanize"
   include ApplicationHelper
 

@@ -1,7 +1,7 @@
 class DodaWorker
   include Sidekiq::Worker
   include ApplicationHelper
-  include CrawlerHelper
+  include DodaHelper
   # sidekiq_options retry: 2
 
   def perform start, finish
