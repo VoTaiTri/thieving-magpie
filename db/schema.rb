@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.string   "sales",             limit: 255
     t.string   "employees_number",  limit: 255
     t.string   "business_category", limit: 255
+    t.string   "recruiter",         limit: 255
+    t.string   "email",             limit: 255
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
   end
@@ -59,7 +61,7 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.datetime "updated_at",                      null: false
   end
 
-  add_index "jobs", ["company_id"], name: "fk_rails_62ef054f78", using: :btree
+  add_index "jobs", ["company_id"], name: "fk_rails_97c9dc1ab1", using: :btree
 
   add_foreign_key "jobs", "companies"
 end

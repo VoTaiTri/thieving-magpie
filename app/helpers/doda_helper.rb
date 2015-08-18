@@ -5,12 +5,17 @@ module DodaHelper
   def get_work_page_doda
     page = mechanize_webstie "http://doda.jp/"
     link = page.link_with(text: "求人検索").click.uri.to_s
-    
+
     subpage = mechanize_webstie link
 
     form = subpage.forms.first
     button = form.buttons.first
-    work_page = form.submit(button)
+    form.submit(button)
+  end
+
+  def get_number_page_doda
+    work_page = get_work_page_doda
+    work_page.search("div.number_list ul li")[-3].text.to_i
   end
 
   def get_list_job_link workpage, start_page, finish_page
@@ -31,7 +36,7 @@ module DodaHelper
         end
       rescue => e
         list_page_error += 1
-        write_error_to_file "get_list_job_link", list_page_error, e
+        write_error_to_file "get_list_job_link_doda", list_page_error, e
       end
     end
 
@@ -116,6 +121,7 @@ module DodaHelper
             convert_new_line row.search("td p").children
             arr[0] = row.search("td p").text.strip
           when Settings.mechanize.full_tel
+            byebug
             convert_new_line row.search("td p").children
             arr[1] = row.search("td p").text.strip
           end

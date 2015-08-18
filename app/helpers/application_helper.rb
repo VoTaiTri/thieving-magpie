@@ -17,12 +17,9 @@ module ApplicationHelper
 
   def convert_new_line objects
     objects.each do |object|
-      if object.name == "br" || object.name == "p"
-        object.content = "\n"
-      end
-      if Nokogiri::XML::Text == object.class
-        object.content = object.text.squish
-      end
+      object.content = "\n" if object.name == "br"
+      object.content = object.text.squish + "\n" if object.name == "p"
+      object.content = object.text.squish if Nokogiri::XML::Text == object.class
     end
   end
 

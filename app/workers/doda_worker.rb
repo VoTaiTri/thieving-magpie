@@ -1,11 +1,12 @@
 class DodaWorker
   include Sidekiq::Worker
-  include ApplicationHelper
+  # include ApplicationHelper
   include DodaHelper
   # sidekiq_options retry: 2
 
   def perform start, finish
     workpage = get_work_page_doda
+    byebug
     
     lists = get_list_job_link workpage, start, finish
     
@@ -159,7 +160,7 @@ class DodaWorker
         end
       rescue StandardError => e
         error_counter += 1
-        write_error_to_file "work #{worker}::get_data", error_counter, e
+        write_error_to_file "work #{worker}::get_data_doda", error_counter, e
       end
     end
     # begin
