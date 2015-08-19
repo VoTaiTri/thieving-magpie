@@ -8,6 +8,14 @@ module ApplicationHelper
     agent.get web_url
   end
 
+  def get_work_page_general url
+    page = mechanize_webstie url
+    
+    form = page.forms.first
+    button = form.buttons.first
+    form.submit button
+  end
+
   def reset_worker
     Sidekiq::Queue.new.clear
     Sidekiq::RetrySet.new.clear

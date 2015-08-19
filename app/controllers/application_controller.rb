@@ -6,4 +6,5 @@ class ApplicationController < ActionController::Base
   include ApplicationHelper
   include DodaHelper
   include EcareerHelper
+  include JsenHelper
 end

@@ -1,12 +1,10 @@
 class EcareerWorker
   include Sidekiq::Worker
-  # include ApplicationHelper
   include EcareerHelper
 
   def perform arr, start, finish
-    workpage = get_work_page_ecareer
+    workpage = get_work_page_general "http://www.ecareer.ne.jp/"
     lists = get_list_job_link workpage, arr, start, finish
-    # byebug
 
     error_counter = 0
     dem = finish - start + 1

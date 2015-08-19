@@ -2,15 +2,8 @@ module EcareerHelper
   require "mechanize"
   include ApplicationHelper
 
-  def get_work_page_ecareer
-    page = mechanize_webstie "http://www.ecareer.ne.jp/"
-    form = page.forms.first
-    button = form.buttons.first
-    form.submit(button)
-  end
-
   def get_number_page_ecareer
-    work_page = get_work_page_ecareer
+    work_page = get_work_page_general "http://www.ecareer.ne.jp/"
     number_record = work_page.search("div.ctrl p.ctrlDisplay")[0].children[1].text.to_i
     div = number_record / 30
     number_page = number_record % 30 == 0 ? div : div + 1

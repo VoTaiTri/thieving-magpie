@@ -13,7 +13,10 @@ class CrawlerController < ApplicationController
     elsif params[:source] == ["ecareer"]
       page = get_number_page_ecareer
       page_count = page[1]
+    elsif params[:source] == ["jsen"]
+      page_count = get_number_page_jsen
     end
+      
 
     worker_num = Settings.number_worker
     # if page_count % worker_num == 0
@@ -29,8 +32,9 @@ class CrawlerController < ApplicationController
         DodaWorker.perform_async start_page, finish_page
       elsif params[:source] == ["ecareer"]
         EcareerWorker.perform_async page, start_page, finish_page
+      elsif params[:source] == ["jsen"]
+        JsenWorker.perform_async start_page, finish_page
       end
-      
     end
       
     redirect_to root_path

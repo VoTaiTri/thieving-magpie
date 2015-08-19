@@ -10,7 +10,7 @@ module DodaHelper
 
     form = subpage.forms.first
     button = form.buttons.first
-    form.submit(button)
+    form.submit button
   end
 
   def get_number_page_doda

@@ -1,5 +1,5 @@
 number_worker: 1
-page_per_job: 2
+page_per_job: 1
 regular:
   home_page: !ruby/regexp /／[^／]*ｉｎｄｅｘ(.*)．(ａｓｐ|ｓ?ｈｔｍｌ?|ｐｈｐ)$/
   address:
@@ -75,4 +75,4 @@ html:
   n: "\n"
 strange: "　＋ー、。,.･・－‐．～：！※＆"
 bracket: "【】（）「」／＜＞()，≪≫［］『』"
-option_crawler: [["Doda", "doda"],["Ecareer", "ecareer"]]
+option_crawler: [["Doda", "doda"],["Ecareer", "ecareer"], ["J-sen", "jsen"]]
