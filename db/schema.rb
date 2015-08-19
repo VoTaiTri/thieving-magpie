@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.string   "convert_name",      limit: 255
     t.string   "postal_code",       limit: 255
     t.string   "raw_address",       limit: 255
-    t.string   "full_address",      limit: 255
+    t.text     "full_address",      limit: 65535
     t.string   "address1",          limit: 255
     t.string   "address2",          limit: 255
     t.string   "address34",         limit: 255
@@ -61,7 +61,7 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.datetime "updated_at",                      null: false
   end
 
-  add_index "jobs", ["company_id"], name: "fk_rails_97c9dc1ab1", using: :btree
+  add_index "jobs", ["company_id"], name: "fk_rails_e06b5932be", using: :btree
 
   add_foreign_key "jobs", "companies"
 end

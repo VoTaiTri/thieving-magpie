@@ -5,7 +5,7 @@ class CreateCompanies < ActiveRecord::Migration
       t.string :convert_name
       t.string :postal_code
       t.string :raw_address
-      t.string :full_address
+      t.text :full_address
       t.string :address1
       t.string :address2
       t.string :address34

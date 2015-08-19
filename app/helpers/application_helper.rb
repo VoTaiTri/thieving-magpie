@@ -1,6 +1,7 @@
 module ApplicationHelper
   require "sidekiq/api"
   require "mechanize"
+  require "open-uri"
 
   def mechanize_webstie web_url
     agent = Mechanize.new
