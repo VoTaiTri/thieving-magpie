@@ -3,10 +3,10 @@ module DodaHelper
   include ApplicationHelper
 
   def get_work_page_doda
-    page = mechanize_webstie "http://doda.jp/"
+    page = mechanize_website "http://doda.jp/"
     link = page.link_with(text: "求人検索").click.uri.to_s
 
-    subpage = mechanize_webstie link
+    subpage = mechanize_website link
 
     form = subpage.forms.first
     button = form.buttons.first

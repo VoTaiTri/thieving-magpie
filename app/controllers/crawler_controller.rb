@@ -8,7 +8,9 @@ class CrawlerController < ApplicationController
   end
 
   def thieving
-    if params[:source] == ["doda"]
+    if params[:source] == ["green"]
+      page_count = get_number_page_green
+    elsif params[:source] == ["doda"]
       page_count = get_number_page_doda
     elsif params[:source] == ["ecareer"]
       page = get_number_page_ecareer
@@ -28,7 +30,9 @@ class CrawlerController < ApplicationController
     Settings.number_worker.times do |i|
       start_page = page_num * i + 1
       finish_page = page_num * (i + 1)
-      if params[:source] == ["doda"]
+      if params[:source] == ["green"]
+        GreenWorker.perform_async start_page, finish_page
+      elsif params[:source] == ["doda"]
         DodaWorker.perform_async start_page, finish_page
       elsif params[:source] == ["ecareer"]
         EcareerWorker.perform_async page, start_page, finish_page

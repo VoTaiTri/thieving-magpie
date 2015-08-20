@@ -3,6 +3,7 @@ class CreateJobs < ActiveRecord::Migration
     create_table :jobs do |t|
       t.string :title
       t.string :job_category
+      t.string :job_type
       t.string :business_category
       t.text :workplace
       t.text :requirement

@@ -3,18 +3,22 @@ module ApplicationHelper
   require "mechanize"
   require "open-uri"
 
-  def mechanize_webstie web_url
+  def mechanize_website web_url
     agent = Mechanize.new
     agent.user_agent_alias = "Mac Safari"
     agent.get web_url
   end
 
   def get_work_page_general url
-    page = mechanize_webstie url
-    
+    page = mechanize_website url
     form = page.forms.first
     button = form.buttons.first
     form.submit button
+  end
+
+  def get_page_by_link_text url, text
+    page = mechanize_website url
+    page = page.link_with(text: text).click
   end
 
   def reset_worker
@@ -27,8 +31,8 @@ module ApplicationHelper
   def convert_new_line objects
     objects.each do |object|
       object.content = "\n" if object.name == "br"
-      object.content = object.text.squish + "\n" if object.name == "p"
-      object.content = object.text.squish if Nokogiri::XML::Text == object.class
+      object.content = object.text.strip + "\n" if object.name == "p"
+      object.content = object.text.strip if Nokogiri::XML::Text == object.class
     end
   end
 

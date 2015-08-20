@@ -28,7 +28,7 @@ class JsenWorker
         companies_hash[:worker] = worker
         jobs_hash[:worker] = worker
 
-        detail_page = mechanize_webstie link
+        detail_page = mechanize_website link
         companies_hash[:name] = detail_page.search("h1 a.txt-1").text.squish.delete("の転職/求人情報")
         jobs_hash[:title] = detail_page.search("h1 a.txt-2").text.squish
 

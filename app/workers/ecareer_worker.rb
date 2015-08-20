@@ -27,7 +27,7 @@ class EcareerWorker
         jobs_hash[:worker] = worker
         
         if link.present?
-          detail_page = mechanize_webstie link
+          detail_page = mechanize_website link
           
           companies_hash[:url] = link
           jobs_hash[:inexperience] = 1 if detail_page.search("div#wrapper div.iconArea ul li.ouboshikaku").present? && detail_page.search("div#wrapper div.iconArea ul li.ouboshikaku").text.include?("未経験者歓迎") == true

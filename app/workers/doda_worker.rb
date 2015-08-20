@@ -31,7 +31,7 @@ class DodaWorker
         companies_hash[:worker] = worker
         jobs_hash[:worker] = worker
        
-        job_page = mechanize_webstie link
+        job_page = mechanize_website link
         detail_url = get_job_detail_url job_page
 
         if detail_url.present?

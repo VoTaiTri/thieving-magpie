@@ -44,6 +44,7 @@ ActiveRecord::Schema.define(version: 20150724014233) do
   create_table "jobs", force: :cascade do |t|
     t.string   "title",             limit: 255
     t.string   "job_category",      limit: 255
+    t.string   "job_type",          limit: 255
     t.string   "business_category", limit: 255
     t.text     "workplace",         limit: 65535
     t.text     "requirement",       limit: 65535
@@ -61,7 +62,7 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.datetime "updated_at",                      null: false
   end
 
-  add_index "jobs", ["company_id"], name: "fk_rails_e06b5932be", using: :btree
+  add_index "jobs", ["company_id"], name: "fk_rails_573d0ee8d4", using: :btree
 
   add_foreign_key "jobs", "companies"
 end
