@@ -3,7 +3,8 @@ module EcareerHelper
   include ApplicationHelper
 
   def get_number_page_ecareer
-    work_page = get_work_page_general "http://www.ecareer.ne.jp/"
+    url = Settings.crawler.ecareer.url
+    work_page = get_work_page_general url
     number_record = work_page.search("div.ctrl p.ctrlDisplay")[0].children[1].text.to_i
     div = number_record / 30
     number_page = number_record % 30 == 0 ? div : div + 1
@@ -11,6 +12,7 @@ module EcareerHelper
   end
 
   def get_list_job_link workpage, arr, start_page, finish_page
+    url = Settings.crawler.ecareer.url
     # list_job_link = (start_page == 1)? workpage.search("li.entry a").map {|link| "http://www.ecareer.ne.jp" + link["href"]} : []
 
     # list_page_error = 0
@@ -37,7 +39,7 @@ module EcareerHelper
     #   end
     # end
 
-    return workpage.search("li.entry a").map {|link| "http://www.ecareer.ne.jp" + link["href"]}
+    return workpage.search("li.entry a").map {|link| url + link["href"]}
   end
 
   def convert_basic_info objects
@@ -57,34 +59,34 @@ module EcareerHelper
     job_detail_page.search("div#applicationGuideBlock table tr").each do |block|
       if block.search("th").present? && block.search("td").present?
         case block.search("th").text.strip
-        when "具体的な業務内容" # 5 jobs.content
+        when Settings.crawler.ecareer.job_content
           convert_new_line block.search("td")[0].children
           block_array[0] = block.search("td").text.strip
-        when "年齢" # 6.1 requirement
+        when Settings.crawler.ecareer.requirement.part1
           convert_new_line block.search("td")[0].children
           block_array[1] = block.search("td").text.strip
-        when "学歴" # 6.2
+        when Settings.crawler.ecareer.requirement.part2
           convert_new_line block.search("td")[0].children
           block_array[2] = block.search("td").text.strip
-        when "必須の経験スキル・資格" # 6.3
+        when Settings.crawler.ecareer.requirement.part3
           convert_new_line block.search("td")[0].children
           block_array[3] = block.search("td").text.strip
-        when "勤務地" # 2 workplace
+        when Settings.workplace
           convert_new_line block.search("td address")[0].children
           block_array[4] = block.search("td address").text.strip
-        when "勤務時間" #  work_time
+        when Settings.work_time
           convert_new_line block.search("td")[0].children
           block_array[5] = block.search("td").text.strip
-        when "給与" # 2 salary
+        when Settings.salary
           convert_new_line block.search("td")[0].children
           block_array[6] = block.search("td").text.strip
-        when "諸手当" # treatment
+        when Settings.crawler.ecareer.treatment
           convert_new_line block.search("td")[0].children
           block_array[7] = block.search("td").text.strip
-        when "休日・休暇" # holiday
+        when Settings.mechanize.holiday
           convert_new_line block.search("td")[0].children
           block_array[8] = block.search("td").text.strip
-        when "待遇・福利厚生" # treatment
+        when Settings.mechanize.treatment
           convert_new_line block.search("td")[0].children
           block_array[9] = block.search("td").text.strip
         end
@@ -97,17 +99,17 @@ module EcareerHelper
     block_array = ["", "", "", "", "", ""]
     job_detail_page.search("div#corpInfoBlock table tr").each do |block|
       case block.search("th").text.strip
-      when "企業名" # company_name
+      when Settings.company_name
         block_array[0] = block.search("td").text.squish
-      when  "本社所在地" # company_address
+      when Settings.crawler.full_address
         block_array[1] = block.search("td address").text.squish
-      when "設立" # establishment
+      when Settings.mechanize.establishment
         block_array[2] = block.search("td").text.squish
-      when "従業員数" # employees_number
+      when Settings.mechanize.employees_number
         block_array[3] = block.search("td").text.squish
-      when "資本金" # capital
+      when Settings.mechanize.capital
         block_array[4] = block.search("td").text.squish
-      when "売上高" # sales 
+      when Settings.mechanize.sales
         block_array[5] = block.search("td").text.squish
       end
     end
@@ -157,4 +159,5 @@ module EcareerHelper
     end
     arr
   end
+
 end

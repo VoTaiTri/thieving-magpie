@@ -27,7 +27,6 @@ regular:
   postal_code: !ruby/regexp /〒?([０-９0-9[-－‐]{1}]{8}\s?)/
 export_file:
   company_id: "企業ID"
-  company_name: "企業名"
   postal_code: "郵便番号"
   address1: "都道府県"
   address2and3: "市区町村番地"
@@ -43,13 +42,11 @@ export_file:
     source: "掲載媒体"
     url: "掲載URL"
     title: "案件タイトル"
-    requirement: "応募資格"
     inexperience:
       text: "未経験OK"
       ok: "◯"
     job_category: "募集職種"
     holiday: "休日、休暇"
-    treatment: "待遇"
   company:
     sheet: "Company"
 mechanize:
@@ -63,11 +60,17 @@ mechanize:
   capital: "資本金"
   sales: "売上高"
   job_category: "職種"
+  job_type: "職種名"
+  salary: "想定年収（給与詳細）"
+company_name: "企業名"
 content: "仕事内容"
 work_time: "勤務時間"
 salary: "給与"
 workplace: "勤務地"
 business_category: "業種"
+requirement: "応募資格"
+job_category: "募集職種"
+treatment: "待遇"
 space: " 　"
 html:
   br: "br"
@@ -76,3 +79,30 @@ html:
 strange: "　＋ー、。,.･・－‐．～：！※＆"
 bracket: "【】（）「」／＜＞()，≪≫［］『』"
 option_crawler: [["Green", "green"], ["Doda", "doda"], ["Ecareer", "ecareer"], ["J-sen", "jsen"]]
+crawler:
+  full_address: "本社所在地"
+  green:
+    url: "http://www.green-japan.com"
+    link_text: "求人を探す"
+    holiday: "休日/休暇"
+    company_name: "会社名"
+    business_category: "業界"
+    sales: "売上（3年分）"
+    establishment: "設立年月"
+    address: "勤務地詳細"
+  jsen:
+    url: "http://job.j-sen.jp"
+    full_address: "事業所"
+  doda:
+    url: "http://doda.jp/"
+    click: "求人検索"
+    experience: "未経験歓迎"
+    detail_text: "募集要項"
+  ecareer:
+    url: "http://www.ecareer.ne.jp"
+    job_content: "具体的な業務内容"
+    requirement:
+      part1: "年齢"
+      part2: "学歴"
+      part3: "必須の経験スキル・資格"
+    treatment: "諸手当"

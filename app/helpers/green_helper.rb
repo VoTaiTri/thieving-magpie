@@ -3,14 +3,17 @@ module GreenHelper
   include ApplicationHelper
 
   def get_number_page_green
-    work_page = get_page_by_link_text "http://www.green-japan.com/", "求人を探す"
+    url = Settings.crawler.green.url
+    link_text = Settings.crawler.green.link_text
+    work_page = get_page_by_link_text url, link_text
     work_page.search("div.pagers a")[-2].text.to_i
   end
 
   def get_list_job_link workpage, start_page, finish_page
+    url = Settings.crawler.green.url
     if start_page == 1
       lists = workpage.search("div.detail-btn a")
-      list_job_link = lists.map {|link| "http://www.green-japan.com" + link["href"]}\
+      list_job_link = lists.map {|link| url + link["href"]}
     else
       list_job_link = []
     end
@@ -23,7 +26,7 @@ module GreenHelper
         elsif next_link.split("page=")[1].to_i >= start_page && next_link.split("page=")[1].to_i <= finish_page
           workpage = workpage.link_with(href: next_link).click
           paginate = workpage.search("div.detail-btn a")
-          list_job_link += paginate.map {|link| "http://www.green-japan.com" + link["href"]}\
+          list_job_link += paginate.map {|link| url + link["href"]}
         else
           break
         end
@@ -40,26 +43,26 @@ module GreenHelper
     job_detail_page.search("table.tb_com_data tr").each do |row|
       if row.search("td.l_td").present? && row.search("td.r_td").present?
         case row.search("td.l_td").text.strip
-        when "職種名" # jobs.type
+        when Settings.mechanize.job_type
           data[0] = row.search("td.r_td").text.strip
-        when "仕事内容" # jobs.content
+        when Settings.content
           convert_new_line row.search("td.r_td")[0].children
           data[1] = row.search("td.r_td").text.strip
-        when "応募資格" # jobs.requirement
+        when Settings.requirement
           convert_new_line row.search("td.r_td")[0].children
           data[2] = row.search("td.r_td").text.strip
-        when "想定年収（給与詳細）" # jobs.salary...
+        when Settings.mechanize.salary
           if /(\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)
             data[3] = /(\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)[1]
           end
-        when "勤務地" # jobs.workplace...
+        when Settings.workplace
           data[4] = parse_work_place row.search("td.r_td").children
-        when "勤務時間" # jobs.work_time
+        when Settings.work_time
           data[5] = row.search("td.r_td").text.strip
-        when "待遇・福利厚生" # treatment
+        when Settings.mechanize.treatment
           convert_new_line row.search("td.r_td")[0].children
           data[6] = row.search("td.r_td").text.strip
-        when "休日/休暇" # holiday
+        when Settings.crawler.green.holiday
           convert_new_line row.search("td.r_td")[0].children
           data[7] = row.search("td.r_td").text.strip
         end
@@ -73,19 +76,19 @@ module GreenHelper
     job_detail_page.search("table.tb_com_data tr").each do |row|
       if row.search("td.l_td").present? && row.search("td.r_td").present?
         case row.search("td.l_td").text.strip
-        when "会社名" # companies.name
+        when Settings.crawler.green.company_name
           data[0] = row.search("td.r_td").text.strip
-        when "業界" #companies.business_category
+        when Settings.crawler.green.business_category
           data[1] = parse_business_category row.search("td.r_td")[0]
-        when "資本金" # capital
+        when Settings.mechanize.capital
           data[2] = row.search("td.r_td").text.strip
-        when "売上（3年分）" #sales ...
+        when Settings.crawler.green.sales
           data[3] = parse_sales_info row.search("td.r_td tr td")
-        when "設立年月" # establishment
+        when Settings.crawler.green.establishment
           data[4] = row.search("td.r_td").text.strip
-        when "従業員数" # employees_number
+        when Settings.mechanize.employees_number
           data[5] = row.search("td.r_td").text.strip
-        when "本社所在地" # full_address
+        when Settings.crawler.full_address
           data[6] = row.search("td.r_td").text.strip
         end
       end
@@ -104,9 +107,9 @@ module GreenHelper
   end
 
   def parse_work_place objects
-    if objects.text.strip.include? "勤務地詳細"
+    if objects.text.strip.include? Settings.crawler.green.address
       objects.each do |object|
-        if object.text.strip.include? "勤務地詳細"
+        if object.text.strip.include? Settings.crawler.green.address
           objects.delete object
           break
         else

@@ -9,15 +9,15 @@ class ExportRubyxl < ActiveRecord::Base
     sheet1.add_cell 0, 1, Settings.export_file.job.id
     sheet1.add_cell 0, 2, Settings.export_file.company_id
     sheet1.add_cell 0, 3, "N社の企業ID"
-    sheet1.add_cell 0, 4, Settings.export_file.company_name
+    sheet1.add_cell 0, 4, Settings.company_name
     sheet1.add_cell 0, 5, Settings.export_file.job.source
     sheet1.add_cell 0, 6, Settings.export_file.job.url
     sheet1.add_cell 0, 7, Settings.export_file.job.title
-    sheet1.add_cell 0, 8, Settings.export_file.job.requirement
+    sheet1.add_cell 0, 8, Settings.requirement
     sheet1.add_cell 0, 9, Settings.export_file.job.inexperience.text
     sheet1.add_cell 0, 10, Settings.workplace
     sheet1.add_cell 0, 11, Settings.business_category
-    sheet1.add_cell 0, 12, Settings.export_file.job.job_category
+    sheet1.add_cell 0, 12, Settings.job_category
     sheet1.add_cell 0, 13, Settings.content
     sheet1.add_cell 0, 14, Settings.work_time
     sheet1.add_cell 0, 15, Settings.salary
@@ -67,7 +67,7 @@ class ExportRubyxl < ActiveRecord::Base
     sheet2 = workbook.add_worksheet Settings.export_file.company.sheet
     sheet2.add_cell 0, 0, Settings.export_file.company_id
     sheet2.add_cell 0, 1, Settings.export_file.today.text
-    sheet2.add_cell 0, 2, Settings.export_file.company_name
+    sheet2.add_cell 0, 2, Settings.company_name
     sheet2.add_cell 0, 3, "職種カテゴリー"
     sheet2.add_cell 0, 4, "職種サブカテゴリー"
     sheet2.add_cell 0, 5, Settings.export_file.postal_code

@@ -3,8 +3,9 @@ module DodaHelper
   include ApplicationHelper
 
   def get_work_page_doda
-    page = mechanize_website "http://doda.jp/"
-    link = page.link_with(text: "求人検索").click.uri.to_s
+    url = Settings.crawler.doda.url
+    page = mechanize_website url
+    link = page.link_with(text: Settings.crawler.doda.click).click.uri.to_s
 
     subpage = mechanize_website link
 
@@ -49,7 +50,7 @@ module DodaHelper
     unless job_page.search("ul.tab_btn.clr a img").nil?
       job_page.search("ul.tab_btn.clr a img").each do |img|
         begin
-          if img.attributes["alt"].text == "募集要項"
+          if img.attributes["alt"].text == Settings.crawler.doda.detail_text
             job_detail_url = img.parent.attributes.first[1].value
             break
           end
@@ -202,7 +203,7 @@ module DodaHelper
     experience = 0
     if job_detail_page.search("p.ico_box01").present? && job_detail_page.search("p.ico_box01")[0].present? && job_detail_page.search("p.ico_box01")[0].children.present?
       job_detail_page.search("p.ico_box01")[0].children.each do |exp|
-        experience = 1 if Nokogiri::XML::Element == exp.class && exp.attributes["alt"].text == "未経験歓迎"
+        experience = 1 if Nokogiri::XML::Element == exp.class && exp.attributes["alt"].text == Settings.crawler.doda.experience
       end
     end
     return experience
