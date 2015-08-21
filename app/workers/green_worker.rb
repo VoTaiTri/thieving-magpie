@@ -6,8 +6,6 @@ class GreenWorker
     workpage = get_page_by_link_text "http://www.green-japan.com/", "求人を探す"
     lists = get_list_job_link workpage, start, finish
 
-    # lists = ["http://www.green-japan.com/job/35051"]
-
     error_counter = 0
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
@@ -31,6 +29,7 @@ class GreenWorker
         if link.present?
           detail_page = mechanize_website link
           companies_hash[:url] = link
+          jobs_hash[:url] = link
 
           jobs_hash[:title] = detail_page.search("span.company-name__com_title").text.strip
 
@@ -49,6 +48,7 @@ class GreenWorker
             company_page = detail_page.link_with(text: "企業詳細").click
             company_table = parse_company_data_table company_page
             companies_hash[:name] = handle_general_text company_table[0]
+            companies_hash[:convert_name] = companies_hash[:name]
             companies_hash[:business_category] = company_table[1]
             companies_hash[:capital] = company_table[2]
             companies_hash[:sales] = company_table[3]

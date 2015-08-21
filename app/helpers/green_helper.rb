@@ -14,6 +14,7 @@ module GreenHelper
     if start_page == 1
       lists = workpage.search("div.detail-btn a")
       list_job_link = lists.map {|link| url + link["href"]}
+      list_job_link += get_more_other_jobs workpage, url
     else
       list_job_link = []
     end
@@ -21,12 +22,13 @@ module GreenHelper
     while workpage.search("div.pagers a.next_page").present?
       begin
         next_link = workpage.search("div.pagers a.next_page")[0].attributes["href"].value
-        if next_link.split("?page=")[1].to_i < start_page
+        if next_link.split("?page=")[1].to_i == 2 || next_link.split("?page=")[1].to_i < start_page
           workpage = workpage.link_with(href: next_link).click
-        elsif next_link.split("page=")[1].to_i >= start_page && next_link.split("page=")[1].to_i <= finish_page
-          workpage = workpage.link_with(href: next_link).click
+        elsif next_link.split("page=")[1].to_i >= start_page + 1 && next_link.split("page=")[1].to_i <= finish_page + 1
           paginate = workpage.search("div.detail-btn a")
           list_job_link += paginate.map {|link| url + link["href"]}
+          list_job_link += get_more_other_jobs workpage, url
+          workpage = workpage.link_with(href: next_link).click
         else
           break
         end
@@ -36,6 +38,15 @@ module GreenHelper
       end
     end
     list_job_link
+  end
+
+  def get_more_other_jobs workpage, url
+    list_other_job = []
+    if workpage.search("div.other-jobs-box").present?
+      other_job = workpage.search("div.other-jobs-box ul li")
+      list_other_job += other_job.map {|l| url + l.children[1].attributes["href"].value}
+    end
+    list_other_job
   end
 
   def parse_job_data_table job_detail_page
@@ -52,8 +63,8 @@ module GreenHelper
           convert_new_line row.search("td.r_td")[0].children
           data[2] = row.search("td.r_td").text.strip
         when Settings.mechanize.salary
-          if /(\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)
-            data[3] = /(\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)[1]
+          if /(〜?\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)
+            data[3] = /(〜?\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)[1]
           end
         when Settings.workplace
           data[4] = parse_work_place row.search("td.r_td").children

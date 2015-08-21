@@ -1,5 +1,5 @@
-number_worker: 1
-page_per_job: 1
+number_worker: 2
+page_per_job: 2
 regular:
   home_page: !ruby/regexp /／[^／]*ｉｎｄｅｘ(.*)．(ａｓｐ|ｓ?ｈｔｍｌ?|ｐｈｐ)$/
   address:

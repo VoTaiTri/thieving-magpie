@@ -37,7 +37,7 @@ class DodaWorker
           if detail_page.search("div.main_ttl_box h1").present?
             company_name = detail_page.search("div.main_ttl_box h1").text.squish
             companies_hash[:name] = handle_general_text company_name
-            companies_hash[:convert_name] = convert_company_name "南海グループ３社合同募集／南海ウイングバス南部・南海ウイングバス金岡株式会社・南海バス株式会社"
+            companies_hash[:convert_name] = companies_hash[:name]
             byebug
           end
 
