@@ -6,11 +6,9 @@ class DodaWorker
 
   def perform start, finish
     workpage = get_work_page_doda
-    byebug
-    
-    lists = get_list_job_link workpage, start, finish
-    
+    lists = get_list_job_link workpage, start, finish    
     # lists = ["http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001020763/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/"]
+
     error_counter = 0
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
@@ -39,8 +37,7 @@ class DodaWorker
           if detail_page.search("div.main_ttl_box h1").present?
             company_name = detail_page.search("div.main_ttl_box h1").text.squish
             companies_hash[:name] = handle_general_text company_name
-            # byebug
-            companies_hash[:convert_name] = convert_company_name companies_hash[:name]
+            companies_hash[:convert_name] = convert_company_name "南海グループ３社合同募集／南海ウイングバス南部・南海ウイングバス金岡株式会社・南海バス株式会社"
             byebug
           end
 

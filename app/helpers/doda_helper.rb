@@ -122,7 +122,6 @@ module DodaHelper
             convert_new_line row.search("td p").children
             arr[0] = row.search("td p").text.strip
           when Settings.mechanize.full_tel
-            byebug
             convert_new_line row.search("td p").children
             arr[1] = row.search("td p").text.strip
           end
