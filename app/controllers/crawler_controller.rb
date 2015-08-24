@@ -26,10 +26,11 @@ class CrawlerController < ApplicationController
     # else
     #   page_per_job = page_count / worker_num + 1
     # end
-    page_num = Settings.page_per_job
+
+    page_per_job = Settings.page_per_job
     Settings.number_worker.times do |i|
-      start_page = page_num * i + 1
-      finish_page = page_num * (i + 1)
+      start_page = page_per_job * i + 1
+      finish_page = page_per_job * (i + 1)
       if params[:source] == ["green"]
         GreenWorker.perform_async start_page, finish_page
       elsif params[:source] == ["doda"]

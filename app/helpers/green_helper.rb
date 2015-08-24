@@ -63,9 +63,8 @@ module GreenHelper
           convert_new_line row.search("td.r_td")[0].children
           data[2] = row.search("td.r_td").text.strip
         when Settings.mechanize.salary
-          if /(〜?\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)
-            data[3] = /(〜?\d+万円〜*\d*万*円*)/.match(row.search("td.r_td").text.squish)[1]
-          end
+          convert_new_line row.search("td.r_td")[0].children
+          data[3] = row.search("td.r_td").text.strip
         when Settings.workplace
           data[4] = parse_work_place row.search("td.r_td").children
         when Settings.work_time
@@ -100,7 +99,7 @@ module GreenHelper
         when Settings.mechanize.employees_number
           data[5] = row.search("td.r_td").text.strip
         when Settings.crawler.full_address
-          data[6] = row.search("td.r_td").text.strip
+          data[6] = row.search("td.r_td").text.squish
         end
       end
     end
@@ -140,9 +139,10 @@ module GreenHelper
 
   def parse_sales_info objects
     arr = []
-    dem = objects.count / 2
+    column = objects.count / 2
+    dem = column <= 3 ? column : 3
     dem.times do |x|
-      arr[x] = objects[x].text.strip + " : " + objects[x + dem].text.strip
+      arr[x] = objects[x].text.strip + " : " + objects[x + column].text.strip
     end
     sales = arr.join("\n")
   end

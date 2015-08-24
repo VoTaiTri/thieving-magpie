@@ -46,14 +46,6 @@ module ApplicationHelper
     file.write("#{error} error #{count}: " + " #{text}!\n")
   end
 
-  def parse_postal_code str
-    if str.present?
-      raw_postal_code = str.scan(/〒?([０-９0-9[-－‐]{1}]{8}\s?)/).join("/")
-      str = raw_postal_code.delete("^0-9０-９/")
-    end
-    str
-  end
-
   def handle_general_text str
     if str.present?
       str = str.delete Settings.space
@@ -108,6 +100,84 @@ module ApplicationHelper
         end
         str = sub.join
       end
+    end
+    str
+  end
+
+  def parse_full_address raw_address
+    full_address = ""
+    if Settings.regular.address.multiple.e.match(raw_address).present? && Settings.regular.address.multiple.e.match(raw_address)[1].present?
+      full_address = Settings.regular.address.multiple.e.match(raw_address)[1].to_s.strip
+    elsif Settings.regular.address.multiple.b.match(raw_address).present? && Settings.regular.address.multiple.b.match(raw_address)[1].present?
+      full_address = Settings.regular.address.multiple.b.match(raw_address)[1].to_s.strip
+    elsif /^.+：(.*)\/.*：/.match(raw_address).present?
+      full_address = /^.+：(.*)\/.*：/.match(raw_address)[1].to_s.strip if /^.+：(.*)\/.*：/.match(raw_address)[1].present?
+    else
+      full_address = raw_address
+    end
+    return full_address
+  end
+
+  def parse_final_address full_address
+    final_address = ["", "", "", "", "", ""]
+    regx12 = Settings.regular.address.address1and2
+
+    if regx12.match(full_address).present?
+      if regx12.match(full_address)[1].present?
+        raw_postal_code = regx12.match(full_address)[1].to_s.strip
+        final_address[0] = parse_postal_code raw_postal_code
+      end
+    
+      if regx12.match(full_address)[2].present?
+        raw_address1 = regx12.match(full_address)[2].to_s.strip
+        if /^.*?([】\\／＞：])(.*)$/.match(raw_address1).present?
+          address1 = /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[2].to_s.squish if /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[2].present?
+          charactor = /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[1].to_s if /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[1].present?
+          if /[：]/.match(charactor).present?
+            raw_address34 = parse_address34_exception(full_address, /(.*)\s.*：/)
+          elsif /[】\]＞／]/.match(charactor).present?
+            raw_address34 = parse_address34_exception(full_address, /(.*)[【\[＜／]/)
+          else
+            raw_address34 = parse_address34 full_address
+          end
+        else
+          address1 = raw_address1.squish
+          raw_address34 = parse_address34 full_address
+        end
+        final_address[1] = handle_general_text address1
+      else
+        raw_address34 = parse_address34 full_address
+      end
+
+      if regx12.match(full_address)[3].present?
+        raw_address2 = regx12.match(full_address)[3].to_s.strip
+        if /^.*?([】\\／＞：])(.*)$/.match(raw_address2).present? && regx12.match(full_address)[2].blank?
+          address2 = /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[3].to_s.squish if /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[3].present?
+          charactor = /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[1].to_s if /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[1].present?
+          if /[：]/.match(charactor).present?
+            raw_address34 = parse_address34_exception(full_address, /(.*)\s.*：/)
+          elsif /[】\]＞]/.match(charactor).present?
+            raw_address34 = parse_address34_exception(full_address, /(.*)[【\[＜]/)
+          end
+        else
+          address2 = raw_address2.squish
+        end
+        final_address[2] = handle_general_text address2
+      end
+
+      final_address[3] = handle_general_text raw_address34[0]
+      address3 = handle_general_text raw_address34[1]
+      address4 = handle_general_text raw_address34[2]
+      final_address[4] = address3
+      final_address[5] = convert_floor address4
+    end
+    final_address
+  end
+
+  def parse_postal_code str
+    if str.present?
+      raw_postal_code = str.scan(/〒?([０-９0-9[-－‐]{1}]{8}\s?)/).join("/")
+      str = raw_postal_code.delete("^0-9０-９/")
     end
     str
   end
@@ -220,10 +290,10 @@ module ApplicationHelper
       companies.each_with_index do |company, num|
         mark[num] = 2
         mark[num] += check_duplicate_home_page company, hash[:home_page] # 2/0.5
-        mark[num] += check_duplicate_tel company, hash[:tel] # 0.5/1/1.5
+        mark[num] += check_duplicate_tel company, hash[:tel] # 0.5/1/1.5 
         mark[num] += check_duplicate_address(company, hash[:address1],
                               hash[:address2], hash[:address3], hash[:address4]) # 0.5/1/1.5/2
-        if mark[num] >= 4.5
+        if mark[num] >= 4
           dup = [mark[num], company.id]
         end
       end
@@ -235,7 +305,7 @@ module ApplicationHelper
         mark[num] += check_duplicate_address(company, hash[:address1], 
                               hash[:address2], hash[:address3], hash[:address4]) # 0.5/1/1.5/2
 
-        if mark[num] >= 3.5
+        if mark[num] >= 3
           dup = [mark[num], company.id]
         end
       end

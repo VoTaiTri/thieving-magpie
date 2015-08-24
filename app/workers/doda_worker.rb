@@ -6,8 +6,7 @@ class DodaWorker
 
   def perform start, finish
     workpage = get_work_page_doda
-    lists = get_list_job_link workpage, start, finish    
-    # lists = ["http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001020763/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/"]
+    lists = get_list_job_link workpage, start, finish
 
     error_counter = 0
     dem = finish - start + 1
@@ -38,7 +37,6 @@ class DodaWorker
             company_name = detail_page.search("div.main_ttl_box h1").text.squish
             companies_hash[:name] = handle_general_text company_name
             companies_hash[:convert_name] = companies_hash[:name]
-            byebug
           end
 
           home_tel = parse_home_and_tel detail_page
@@ -54,61 +52,17 @@ class DodaWorker
           raw_full_address = parse_left_block detail_page
           companies_hash[:raw_address] = raw_full_address
 
-          regx12 = Settings.regular.address.address1and2
-          
           if raw_full_address.present?
             full_address = parse_full_address raw_full_address
             companies_hash[:full_address] = full_address
             
-            if regx12.match(full_address).present?
-              if regx12.match(full_address)[1].present?
-                raw_postal_code = regx12.match(full_address)[1].to_s.strip
-                companies_hash[:postal_code] = parse_postal_code raw_postal_code
-              end
-            
-              if regx12.match(full_address)[2].present?
-                raw_address1 = regx12.match(full_address)[2].to_s.strip
-                if /^.*?([】\\／＞：])(.*)$/.match(raw_address1).present?
-                  address1 = /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[2].to_s.squish if /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[2].present?
-                  charactor = /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[1].to_s if /^.*?([】\\／＞：])(.*)$/.match(raw_address1)[1].present?
-                  if /[：]/.match(charactor).present?
-                    raw_address34 = parse_address34_exception(full_address, /(.*)\s.*：/)
-                  elsif /[】\]＞／]/.match(charactor).present?
-                    raw_address34 = parse_address34_exception(full_address, /(.*)[【\[＜／]/)
-                  else
-                    raw_address34 = parse_address34 full_address
-                  end
-                else
-                  address1 = raw_address1.squish
-                  raw_address34 = parse_address34 full_address
-                end
-                companies_hash[:address1] = handle_general_text address1
-              else
-                raw_address34 = parse_address34 full_address
-              end
-
-              if regx12.match(full_address)[3].present?
-                raw_address2 = regx12.match(full_address)[3].to_s.strip
-                if /^.*?([】\\／＞：])(.*)$/.match(raw_address2).present? && regx12.match(full_address)[2].blank?
-                  address2 = /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[3].to_s.squish if /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[3].present?
-                  charactor = /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[1].to_s if /^.*?([】\\／＞：])(.*)$/.match(raw_address2)[1].present?
-                  if /[：]/.match(charactor).present?
-                    raw_address34 = parse_address34_exception(full_address, /(.*)\s.*：/)
-                  elsif /[】\]＞]/.match(charactor).present?
-                    raw_address34 = parse_address34_exception(full_address, /(.*)[【\[＜]/)
-                  end
-                else
-                  address2 = raw_address2.squish
-                end
-                companies_hash[:address2] = handle_general_text address2
-              end
-
-              companies_hash[:address34] = handle_general_text raw_address34[0]
-              address3 = handle_general_text raw_address34[1]
-              address4 = handle_general_text raw_address34[2]
-              companies_hash[:address3] = address3
-              companies_hash[:address4] = convert_floor address4
-            end
+            raw_address = parse_final_address full_address
+            companies_hash[:postal_code] = raw_address[0]
+            companies_hash[:address1] = raw_address[1]
+            companies_hash[:address2] = raw_address[2]
+            companies_hash[:address34] = raw_address[3]
+            companies_hash[:address3] = raw_address[4]
+            companies_hash[:address4] = raw_address[5]
           end
 
           category = parse_category detail_page 
@@ -131,7 +85,7 @@ class DodaWorker
             companies_hash[:capital] = right[2]
             companies_hash[:sales] = right[3]
             company = Company.new companies_hash
-            # company.save!
+            company.save!
 
             jobs_hash[:company_id] = company.id
           end
@@ -151,7 +105,7 @@ class DodaWorker
           jobs_hash[:inexperience] = parse_experience detail_page
 
           job = Job.new jobs_hash
-          # job.save!
+          job.save!
           # job_state = detail_page.search("div.main_ttl_box p img") - detail_page.search("div.main_ttl_box p.ico_box01 img")
           # array_state = job_state.map {|state| state["alt"]}
         end

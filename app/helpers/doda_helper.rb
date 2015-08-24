@@ -97,20 +97,6 @@ module DodaHelper
     return category_array
   end
 
-  def parse_full_address raw_address
-    full_address = ""
-    if Settings.regular.address.multiple.e.match(raw_address).present? && Settings.regular.address.multiple.e.match(raw_address)[1].present?
-      full_address = Settings.regular.address.multiple.e.match(raw_address)[1].to_s.strip
-    elsif Settings.regular.address.multiple.b.match(raw_address).present? && Settings.regular.address.multiple.b.match(raw_address)[1].present?
-      full_address = Settings.regular.address.multiple.b.match(raw_address)[1].to_s.strip
-    elsif /^.+：(.*)\/.*：/.match(raw_address).present?
-      full_address = /^.+：(.*)\/.*：/.match(raw_address)[1].to_s.strip if /^.+：(.*)\/.*：/.match(raw_address)[1].present?
-    else
-      full_address = raw_address
-    end
-    return full_address
-  end
-
   def parse_home_and_tel job_detail_page
     arr = ["", ""]
     if job_detail_page.search("table tr").present?
