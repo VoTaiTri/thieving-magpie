@@ -4,7 +4,7 @@ module JsenHelper
 
   def get_number_page_jsen
     url = Settings.crawler.jsen.url
-    work_page = get_work_page_general url
+    work_page = get_page_by_first_form url
     work_page.search("ul.pagination li")[-2].text.to_i
   end
 

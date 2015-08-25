@@ -23,6 +23,8 @@ gem "rails_config"
 gem 'mojinizer', '~> 0.2.2'
 gem 'itaiji', '~> 0.1.4'
 
+gem 'selenium-webdriver', '~> 2.47.1'
+
 group :development, :test do
   gem "byebug"
   gem "web-console", "~> 2.0"

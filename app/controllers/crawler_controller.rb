@@ -13,21 +13,17 @@ class CrawlerController < ApplicationController
     elsif params[:source] == ["doda"]
       page_count = get_number_page_doda
     elsif params[:source] == ["ecareer"]
-      page = get_number_page_ecareer
-      page_count = page[1]
+      page_count = get_number_page_ecareer
     elsif params[:source] == ["jsen"]
       page_count = get_number_page_jsen
     end
       
 
     worker_num = Settings.number_worker
-    # if page_count % worker_num == 0
-    #   page_per_job = page_count / worker_num
-    # else
-    #   page_per_job = page_count / worker_num + 1
-    # end
-
-    page_per_job = Settings.page_per_job
+    page = page_count / worker_num
+    page_per_job = page_count % worker_num == 0? page : page + 1
+    
+    # page_per_job = Settings.page_per_job
     Settings.number_worker.times do |i|
       start_page = page_per_job * i + 1
       finish_page = page_per_job * (i + 1)
@@ -36,7 +32,7 @@ class CrawlerController < ApplicationController
       elsif params[:source] == ["doda"]
         DodaWorker.perform_async start_page, finish_page
       elsif params[:source] == ["ecareer"]
-        EcareerWorker.perform_async page, start_page, finish_page
+        EcareerWorker.perform_async page_count, start_page, finish_page
       elsif params[:source] == ["jsen"]
         JsenWorker.perform_async start_page, finish_page
       end

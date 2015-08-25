@@ -1,56 +1,40 @@
 module EcareerHelper
   require "mechanize"
+  require "selenium-webdriver"
   include ApplicationHelper
 
   def get_number_page_ecareer
     url = Settings.crawler.ecareer.url
-    work_page = get_work_page_general url
+    work_page = get_page_by_first_form url
     number_record = work_page.search("div.ctrl p.ctrlDisplay")[0].children[1].text.to_i
     div = number_record / 30
     number_page = number_record % 30 == 0 ? div : div + 1
-      [number_record, number_page]
   end
 
-  def get_list_job_link workpage, arr, start_page, finish_page
+  def get_list_job_link workpage, last_page, start_page, finish_page
     url = Settings.crawler.ecareer.url
-    # list_job_link = (start_page == 1)? workpage.search("li.entry a").map {|link| "http://www.ecareer.ne.jp" + link["href"]} : []
-
-    # list_page_error = 0
-    # byebug
+    driver = Selenium::WebDriver.for :firefox
+    driver.navigate.to workpage.uri.to_s
     
-    # while workpage.uri.to_s == "http://www.ecareer.ne.jp/search/search.do?dir=TOP&jobTypeSelectS=&schsn=&salary=&easySearch=%8C%9F%8D%F5" || workpage.uri.to_s.split("&selectedJobs")[0].split("offset=")[1].to_i <= arr[0]
-    #   begin
-    #     list_job_link = workpage.search("li.entry a").map {|link| "http://www.ecareer.ne.jp" + link["href"]}
-    #     next_link = workpage.search("li.txt")[1].children[0].attributes["href"].text
-    #     if next_link.split("page=")[1].to_i < start_page
-    #       workpage = workpage.link_with(href: next_link).click
-    #     elsif next_link.split("page=")[1].to_i >= start_page && next_link.split("page=")[1].to_i <= finish_page
-    #       workpage = workpage.link_with(href: next_link).click
-    #       list_job_link += workpage.search("p.left_btn a").map {|link| link["href"]}
-    #     else
-    #       break
-    #     end
+    list_job_link = []
 
-    #     list_job_link += workpage.search("li.entry a").map {|link| "http://www.ecareer.ne.jp" + link["href"]}
-    #     byebug
-    #   rescue => e
-    #     list_page_error += 1
-    #     write_error_to_file "get_list_job_link", list_page_error, e
-    #   end
-    # end
+    list_page_error = 0
+    page = start_page
 
-    return workpage.search("li.entry a").map {|link| url + link["href"]}
-  end
-
-  def convert_basic_info objects
-    # convert_new_line objects
-    objects.each do |object|
-      byebug
-      # if "a" == object.name
-      #   link = object.attributes["href"].value.gsub /(^.+&LNK=)/, ""
-      #   object.content = CGI::unescape link
-      # end
+    while page <= finish_page && page <= last_page
+      begin
+        offset = (page - 1) * 30
+        driver.execute_script("pageNavi(#{offset})")
+        workpage = mechanize_website driver.current_url
+        list_job_link += workpage.search("li.entry a").map {|link| url + link["href"]}
+        page += 1
+      rescue => e
+        list_page_error += 1
+        write_error_to_file "get_list_job_link_career", list_page_error, e
+      end
     end
+    driver.quit
+    return list_job_link
   end
 
   def parse_application_block job_detail_page

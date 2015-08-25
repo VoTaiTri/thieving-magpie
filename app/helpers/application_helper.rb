@@ -2,6 +2,7 @@ module ApplicationHelper
   require "sidekiq/api"
   require "mechanize"
   require "open-uri"
+  require "selenium-webdriver"
 
   def mechanize_website web_url
     agent = Mechanize.new
@@ -9,7 +10,12 @@ module ApplicationHelper
     agent.get web_url
   end
 
-  def get_work_page_general url
+  def selenium_webdriver search_url
+    driver = Selenium::WebDriver.for :firefox
+    driver = driver.navigate.to search_url
+  end
+
+  def get_page_by_first_form url
     page = mechanize_website url
     form = page.forms.first
     button = form.buttons.first
@@ -88,7 +94,7 @@ module ApplicationHelper
         end
       end
 
-      if /([^／：・]*[／：・]*)/.match(str).present?
+      if /[／：・]/.match(str).present? && /([^／：・]*[／：・]*)/.match(str).present? 
         sub = []
         dem = 0
         arr = str.scan /([^／：・]*[／：・]*)/
@@ -144,7 +150,7 @@ module ApplicationHelper
           address1 = raw_address1.squish
           raw_address34 = parse_address34 full_address
         end
-        final_address[1] = handle_general_text address1
+        final_address[1] = address1
       else
         raw_address34 = parse_address34 full_address
       end
@@ -162,13 +168,13 @@ module ApplicationHelper
         else
           address2 = raw_address2.squish
         end
-        final_address[2] = handle_general_text address2
+        final_address[2] = address2
       end
 
       final_address[3] = handle_general_text raw_address34[0]
       address3 = handle_general_text raw_address34[1]
       address4 = handle_general_text raw_address34[2]
-      final_address[4] = address3
+      final_address[4] = address3.gsub "－", "−"
       final_address[5] = convert_floor address4
     end
     final_address

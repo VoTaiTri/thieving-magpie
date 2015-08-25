@@ -2,9 +2,10 @@ class EcareerWorker
   include Sidekiq::Worker
   include EcareerHelper
 
-  def perform arr, start, finish
-    workpage = get_work_page_general "http://www.ecareer.ne.jp/"
-    lists = get_list_job_link workpage, arr, start, finish
+  def perform page_count, start, finish
+    workpage = get_page_by_first_form "http://www.ecareer.ne.jp/"
+    lists = get_list_job_link workpage, page_count, start, finish
+    # lists = ["http://www.ecareer.ne.jp/ecareer.ShigotoInfoServlet?CORPCD=00000348014&JOBSEQ=449"]
 
     error_counter = 0
     dem = finish - start + 1
@@ -44,25 +45,56 @@ class EcareerWorker
           jobs_hash[:salary] = application[6]
           jobs_hash[:treatment] = application[7] + "\n" + application[9]
           jobs_hash[:holiday] = application[8]
-
-          corp_info = parse_corp_info_block detail_page
-          companies_hash[:name] = corp_info[0]
-          companies_hash[:raw_address] = corp_info[1]
-          companies_hash[:establishment] = corp_info[2]
-          companies_hash[:employees_number] = corp_info[3]
-          companies_hash[:capital] = corp_info[4]
-          companies_hash[:sales] = corp_info[5]
-
+      
           basic_info = parse_basic_info_block detail_page
-          companies_hash[:full_tel] = basic_info[0]
           companies_hash[:recruiter] = basic_info[1]
           companies_hash[:email] = basic_info[2]
-          companies_hash[:home_page] = basic_info[3]
+          raw_home_page = handle_general_text basic_info[3]
+          companies_hash[:raw_home_page] = raw_home_page
+          companies_hash[:home_page] = convert_home_page raw_home_page
 
-          company = Company.new companies_hash
+          full_tel = handle_general_text basic_info[0].encode("UTF-8")
+          companies_hash[:full_tel] = full_tel
+          companies_hash[:tel] = parse_tel_number full_tel if full_tel.present?
+
+          corp_info = parse_corp_info_block detail_page
+          companies_hash[:name] = handle_general_text corp_info[0]
+          companies_hash[:convert_name] = convert_company_name companies_hash[:name]
+          raw_full_address = corp_info[1]
+          companies_hash[:raw_address] = raw_full_address
+
+          if raw_full_address.present?
+            full_address = parse_full_address raw_full_address
+            companies_hash[:full_address] = full_address
+            
+            raw_address = parse_final_address full_address
+            companies_hash[:postal_code] = raw_address[0]
+            companies_hash[:address1] = raw_address[1]
+            companies_hash[:address2] = raw_address[2]
+            companies_hash[:address34] = raw_address[3]
+            companies_hash[:address3] = raw_address[4]
+            companies_hash[:address4] = raw_address[5]
+          end
+
+          check = check_existed_company companies_hash
+
+          if check.present?
+            jobs_hash[:company_id] = check[1]
+            company = Company.find_by id: check[1]
+            business_category = get_business_category_for_company company, jobs_hash[:business_category]
+            company.update_attributes business_category: business_category
+          else
+            companies_hash[:establishment] = corp_info[2]
+            companies_hash[:employees_number] = corp_info[3]
+            companies_hash[:capital] = corp_info[4]
+            companies_hash[:sales] = corp_info[5]
+            company = Company.new companies_hash
+            company.save!
+            jobs_hash[:company_id] = company.id
+          end
+
           job = Job.new jobs_hash
           
-          company.save!
           job.save!
         end
 

@@ -3,7 +3,7 @@ class JsenWorker
   include JsenHelper
 
   def perform start, finish
-    workpage = get_work_page_general "http://job.j-sen.jp/"
+    workpage = get_page_by_first_form "http://job.j-sen.jp/"
     lists = get_list_job_link workpage, start, finish
     # lists = ["http://job.j-sen.jp/25538/"]
 
