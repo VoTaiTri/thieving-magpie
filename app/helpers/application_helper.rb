@@ -10,11 +10,6 @@ module ApplicationHelper
     agent.get web_url
   end
 
-  def selenium_webdriver search_url
-    driver = Selenium::WebDriver.for :firefox
-    driver = driver.navigate.to search_url
-  end
-
   def get_page_by_first_form url
     page = mechanize_website url
     form = page.forms.first
