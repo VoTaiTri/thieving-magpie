@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.string   "home_page",         limit: 255
     t.text     "url",               limit: 65535
     t.integer  "worker",            limit: 4
+    t.string   "paginate",          limit: 255
     t.string   "establishment",     limit: 255
     t.string   "capital",           limit: 255
     t.string   "sales",             limit: 255
@@ -58,11 +59,12 @@ ActiveRecord::Schema.define(version: 20150724014233) do
     t.text     "url",               limit: 65535
     t.integer  "company_id",        limit: 4
     t.integer  "worker",            limit: 4
+    t.string   "paginate",          limit: 255
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
   end
 
-  add_index "jobs", ["company_id"], name: "fk_rails_59082f4bb0", using: :btree
+  add_index "jobs", ["company_id"], name: "fk_rails_5e98da8403", using: :btree
 
   add_foreign_key "jobs", "companies"
 end

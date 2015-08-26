@@ -17,6 +17,7 @@ class CreateJobs < ActiveRecord::Migration
       t.text :url
       t.references :company
       t.integer :worker
+      t.string :paginate
 
       t.timestamps null: false
     end

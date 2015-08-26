@@ -20,10 +20,10 @@ class CrawlerController < ApplicationController
       
 
     worker_num = Settings.number_worker
-    page = page_count / worker_num
-    page_per_job = page_count % worker_num == 0? page : page + 1
+    # page = page_count / worker_num
+    # page_per_job = page_count % worker_num == 0? page : page + 1
     
-    # page_per_job = Settings.page_per_job
+    page_per_job = Settings.page_per_job
     Settings.number_worker.times do |i|
       start_page = page_per_job * i + 1
       finish_page = page_per_job * (i + 1)

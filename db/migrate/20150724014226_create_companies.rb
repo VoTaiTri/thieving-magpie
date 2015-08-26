@@ -17,6 +17,7 @@ class CreateCompanies < ActiveRecord::Migration
       t.string :home_page
       t.text :url
       t.integer :worker
+      t.string :paginate
       t.string :establishment
       t.string :capital
       t.string :sales

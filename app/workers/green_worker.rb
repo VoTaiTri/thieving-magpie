@@ -7,7 +7,6 @@ class GreenWorker
     link_text = Settings.crawler.green.link_text
     workpage = get_page_by_link_text url, link_text
     lists = get_list_job_link workpage, start, finish
-    # lists = ["http://www.green-japan.com/job/25210"]
 
     error_counter = 0
     dem = finish - start + 1
@@ -29,15 +28,34 @@ class GreenWorker
         companies_hash[:worker] = worker
         jobs_hash[:worker] = worker
 
-        if link.present?
-          detail_page = mechanize_website link
-          companies_hash[:url] = link
+        job_link = link.split("&page=")[0]
+        companies_hash[:paginate] = link.split("&page=")[1]
+        jobs_hash[:paginate] = link.split("&page=")[1]
+
+        if job_link.present?
+          detail_page = mechanize_website job_link
+          companies_hash[:url] = job_link
+          jobs_hash[:url] = job_link
+
+          jobs_hash[:title] = detail_page.search("div.job-offer-heading__left.no_graph h2").text.strip
+          jobs_hash[:job_type] = detail_page.search("div.job-offer-icon").text.strip
+
+          job_section = parse_job_section detail_page
+          jobs_hash[:content] = job_section
+
+          job_table = parse_job_data_table detail_page
+          jobs_hash[:requirement] = job_table[0]
+          jobs_hash[:salary] = job_table[1]
+          jobs_hash[:workplace] = job_table[2]
+          jobs_hash[:work_time] = job_table[3]
+          jobs_hash[:treatment] = job_table[4]
+          jobs_hash[:holiday] = job_table[5]
 
           if detail_page.link_with(text: "企業詳細").present?
             company_page = detail_page.link_with(text: "企業詳細").click
             company_table = parse_company_data_table company_page
             companies_hash[:name] = handle_general_text company_table[0]
-            companies_hash[:convert_name] = companies_hash[:name]
+            companies_hash[:convert_name] = convert_company_name companies_hash[:name]
 
             raw_full_address = company_table[6]
             companies_hash[:raw_address] = raw_full_address
@@ -55,38 +73,23 @@ class GreenWorker
               companies_hash[:address4] = raw_address[5]
             end
             
-            check = check_existed_company companies_hash
-            if check.present?
-              jobs_hash[:company_id] = check[1]
-              company = Company.find_by id: check[1]
-            else
-              companies_hash[:business_category] = company_table[1]
-              companies_hash[:capital] = company_table[2]
-              companies_hash[:sales] = company_table[3]
-              companies_hash[:establishment] = company_table[4]
-              companies_hash[:employees_number] = company_table[5]
-              company = Company.new companies_hash
-              company.save!
-              jobs_hash[:company_id] = company.id
-            end
-
-            jobs_hash[:url] = link
-
-            jobs_hash[:title] = detail_page.search("span.company-name__com_title").text.strip
-
-            job_table = parse_job_data_table detail_page
-            jobs_hash[:job_type] = job_table[0]
-            jobs_hash[:content] = job_table[1]
-            jobs_hash[:requirement] = job_table[2]
-            jobs_hash[:salary] = job_table[3]
-            jobs_hash[:workplace] = job_table[4]
-            jobs_hash[:work_time] = job_table[5]
-            jobs_hash[:treatment] = job_table[6]
-            jobs_hash[:holiday] = job_table[7]
-            
-            job = Job.new jobs_hash
-            job.save!
+            # check = check_existed_company companies_hash
+            # if check.present?
+            #   jobs_hash[:company_id] = check[1]
+            #   company = Company.find_by id: check[1]
+            # else
+            #   companies_hash[:business_category] = company_table[1]
+            #   companies_hash[:capital] = company_table[2]
+            #   companies_hash[:sales] = company_table[3]
+            #   companies_hash[:establishment] = company_table[4]
+            #   companies_hash[:employees_number] = company_table[5]
+            #   company = Company.new companies_hash
+            #   company.save!
+            # end
+            # jobs_hash[:company_id] = company.id
           end
+          # job = Job.new jobs_hash
+          # job.save!
         end
       rescue StandardError => e
         error_counter += 1
