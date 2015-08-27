@@ -50,4 +50,10 @@ class CrawlerController < ApplicationController
       end
     end
   end
+
+  def import
+    file_path = Settings.download_path + params[:company_file].original_filename
+    check = ImportRubyxl::check_reference_company file_path
+    redirect_to root_path
+  end
 end

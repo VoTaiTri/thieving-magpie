@@ -273,7 +273,7 @@ module ApplicationHelper
 
   def convert_floor str
     if str.present?
-      str.gsub "Ｆ","階"
+      str.gsub "階", "Ｆ"
     end
     str
   end

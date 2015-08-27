@@ -1,5 +1,6 @@
 number_worker: 3
 page_per_job: 5
+download_path: "/home/likewise-open/FRAMGIA/vo.tai.tri/Downloads/"
 regular:
   home_page: !ruby/regexp /／[^／]*ｉｎｄｅｘ(.*)．(ａｓｐ|ｓ?ｈｔｍｌ?|ｐｈｐ)$/
   address:
