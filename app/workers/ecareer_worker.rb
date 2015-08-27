@@ -5,7 +5,7 @@ class EcareerWorker
   def perform page_count, start, finish
     workpage = get_page_by_first_form "http://www.ecareer.ne.jp/"
     lists = get_list_job_link workpage, page_count, start, finish
-    # lists = ["http://www.ecareer.ne.jp/ecareer.ShigotoInfoServlet?CORPCD=00000348014&JOBSEQ=449"]
+    # lists = ["http://www.ecareer.ne.jp/ecareer.ShigotoInfoServlet?CORPCD=00038659001&JOBSEQ=7"]
 
     error_counter = 0
     dem = finish - start + 1
@@ -64,17 +64,17 @@ class EcareerWorker
           companies_hash[:raw_address] = raw_full_address
 
           if raw_full_address.present?
-            full_address = parse_full_address raw_full_address
-            companies_hash[:full_address] = full_address
-            
-            raw_address = parse_final_address full_address
+            # full_address = parse_full_address raw_full_address
+            # companies_hash[:full_address] = full_address
+            raw_address = parse_address_detail raw_full_address
             companies_hash[:postal_code] = raw_address[0]
-            companies_hash[:address1] = raw_address[1]
-            companies_hash[:address2] = raw_address[2]
-            companies_hash[:address34] = raw_address[3]
-            companies_hash[:address3] = raw_address[4]
-            companies_hash[:address4] = raw_address[5]
+            companies_hash[:address1] = raw_address[1].squish
+            companies_hash[:address2] = raw_address[2].squish
+            companies_hash[:address34] = raw_address[3].squish
+            companies_hash[:address3] = raw_address[4].squish
+            companies_hash[:address4] = raw_address[5].squish
           end
+          byebug
 
           check = check_existed_company companies_hash
 

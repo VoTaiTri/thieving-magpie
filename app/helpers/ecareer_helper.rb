@@ -37,6 +37,17 @@ module EcareerHelper
     return list_job_link
   end
 
+  def parse_company_address objects
+    objects.children.each do |object|
+      if "text" == object.name
+        object.content = object.text.squish
+      elsif "br" == object.name
+        object.content = "\n"
+      end
+    end
+    objects
+  end
+
   def parse_application_block job_detail_page
     block_array = ["", "", "", "", "", "", "", "", "", ""]
 
@@ -86,7 +97,8 @@ module EcareerHelper
       when Settings.company_name
         block_array[0] = block.search("td").text.squish
       when Settings.crawler.full_address
-        block_array[1] = block.search("td address").text.squish
+        address = parse_company_address block.search("td address")[0]
+        block_array[1] = address.text.strip
       when Settings.mechanize.establishment
         block_array[2] = block.search("td").text.squish
       when Settings.mechanize.employees_number
@@ -98,6 +110,28 @@ module EcareerHelper
       end
     end
     block_array
+  end
+
+  def parse_address_detail raw_address
+    address = ["", "", "", "", "", ""]
+    regx = Settings.regular.address.total
+    rebx_ex = Settings.regular.address.address34exception
+    if regx.match(raw_address).present?
+      arr = regx.match raw_address
+      address[0] = arr[1] if arr[1].present?
+      address[1] = arr[2] if arr[2].present?
+      address[2] = arr[3] if arr[3].present?
+      address[3] = arr[4] + arr[5] if arr[4].present? && arr[5].present?
+      if rebx_ex.match(address[3]).present?
+        arr1 = rebx_ex.match(address[3])
+        address[4] = arr1[1] if arr1[1].present?
+        address[5] = arr1[2] if arr1[2].present?
+      else
+        address[4] = arr1[4] if arr1[4].present?
+        address[5] = arr1[5] if arr1[5].present?
+      end
+    end
+    address
   end
 
   def parse_basic_info_block job_detail_page
