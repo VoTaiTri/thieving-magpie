@@ -73,23 +73,23 @@ class GreenWorker
               companies_hash[:address4] = raw_address[5]
             end
             
-            # check = check_existed_company companies_hash
-            # if check.present?
-            #   jobs_hash[:company_id] = check[1]
-            #   company = Company.find_by id: check[1]
-            # else
-            #   companies_hash[:business_category] = company_table[1]
-            #   companies_hash[:capital] = company_table[2]
-            #   companies_hash[:sales] = company_table[3]
-            #   companies_hash[:establishment] = company_table[4]
-            #   companies_hash[:employees_number] = company_table[5]
-            #   company = Company.new companies_hash
-            #   company.save!
-            # end
-            # jobs_hash[:company_id] = company.id
+            check = check_existed_company companies_hash
+            if check.present?
+              jobs_hash[:company_id] = check[1]
+              company = Company.find_by id: check[1]
+            else
+              companies_hash[:business_category] = company_table[1]
+              companies_hash[:capital] = company_table[2]
+              companies_hash[:sales] = company_table[3]
+              companies_hash[:establishment] = company_table[4]
+              companies_hash[:employees_number] = company_table[5]
+              company = Company.new companies_hash
+              company.save!
+            end
+            jobs_hash[:company_id] = company.id
           end
-          # job = Job.new jobs_hash
-          # job.save!
+          job = Job.new jobs_hash
+          job.save!
         end
       rescue StandardError => e
         error_counter += 1

@@ -3,12 +3,15 @@
   <%= submit_tag "Crawler" %>
 <% end %>
 
-<%= link_to "Export", export_file_path(format: :xlsx ) %></br>
+<%= link_to "Export", export_file_path(format: :xlsx) %></br>
 
 <h2>Import Company</h2>
 <%= form_tag import_file_path, multipart: true do %>
   <%= file_field_tag :company_file %>
   <%= submit_tag "Import" %>
 <% end %>
-<%= @jobs.count %> Job</br>
-<%= @companies.count %> Company</br>
+
+
+<h4><%= @jobs.count %></h4> Job</br>
+<h4><%= @companies.count %></h4> Company</br>
+<h4><%= @reference_company.count %></h4> Comoany hav reference</br>

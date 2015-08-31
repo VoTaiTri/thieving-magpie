@@ -5,6 +5,8 @@ class CrawlerController < ApplicationController
   def index
     @jobs = Job.all
     @companies = Company.all
+    @reference_company = Company.with_reference
+    byebug
   end
 
   def thieving
@@ -20,10 +22,10 @@ class CrawlerController < ApplicationController
       
 
     worker_num = Settings.number_worker
-    # page = page_count / worker_num
-    # page_per_job = page_count % worker_num == 0? page : page + 1
+    page = page_count / worker_num
+    page_per_job = page_count % worker_num == 0? page : page + 1
     
-    page_per_job = Settings.page_per_job
+    # page_per_job = Settings.page_per_job
     Settings.number_worker.times do |i|
       start_page = page_per_job * i + 1
       finish_page = page_per_job * (i + 1)
@@ -52,8 +54,17 @@ class CrawlerController < ApplicationController
   end
 
   def import
-    file_path = Settings.download_path + params[:company_file].original_filename
-    check = ImportRubyxl::check_reference_company file_path
+    file_upload = params[:company_file]
+
+    File.open(Rails.root.join('public', 'uploads', file_upload.original_filename), 'wb') do |file|
+      file.write(file_upload.read)
+    end
+
+    file_path = Settings.download_path + file_upload.original_filename
+    ImportRubyxl::check_reference_company file_path
+
+    File.delete file_path
+
     redirect_to root_path
   end
 end
