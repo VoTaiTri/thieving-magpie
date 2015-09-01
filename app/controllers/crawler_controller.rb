@@ -6,7 +6,6 @@ class CrawlerController < ApplicationController
     @jobs = Job.all
     @companies = Company.all
     @reference_company = Company.with_reference
-    byebug
   end
 
   def thieving
@@ -61,6 +60,7 @@ class CrawlerController < ApplicationController
     end
 
     file_path = Settings.download_path + file_upload.original_filename
+    
     ImportRubyxl::check_reference_company file_path
 
     File.delete file_path

@@ -1,5 +1,5 @@
-number_worker: 5
-page_per_job: 5
+number_worker: 1
+page_per_job: 1
 download_path: "public/uploads/"
 regular:
   home_page: !ruby/regexp /／[^／]*ｉｎｄｅｘ(.*)．(ａｓｐ|ｓ?ｈｔｍｌ?|ｐｈｐ)$/
@@ -75,6 +75,7 @@ mechanize:
   job_type: "職種名"
   salary: "想定年収（給与詳細）"
 company_name: "企業名"
+convert_name: "名寄せ用企業名"
 content: "仕事内容"
 work_time: "勤務時間"
 salary: "給与"

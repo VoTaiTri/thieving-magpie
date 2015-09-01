@@ -3,7 +3,7 @@ class EcareerWorker
   include EcareerHelper
 
   def perform page_count, start, finish
-    workpage = get_page_by_first_form "http://www.ecareer.ne.jp/"
+    workpage = get_page_by_first_form Settings.crawler.ecareer.url
     lists = get_list_job_link workpage, page_count, start, finish
     # lists = ["http://www.ecareer.ne.jp/ecareer.ShigotoInfoServlet?CORPCD=00038659001&JOBSEQ=7"]
 
@@ -35,7 +35,7 @@ class EcareerWorker
 
           jobs_hash[:title] = detail_page.search("div#jobTitle h1")[0].children[0].text.strip
 
-          jobs_hash[:business_category] = detail_page.search("div#wrapper p")[0].children.last.text.squish.gsub "・", "," if detail_page.search("div#wrapper p").present?
+          jobs_hash[:business_category] = detail_page.search("div#wrapper p")[0].children.last.text.squish.gsub("・", ",") if detail_page.search("div#wrapper p").present?
 
           application = parse_application_block detail_page
           jobs_hash[:content] = application[0]
@@ -74,7 +74,6 @@ class EcareerWorker
             companies_hash[:address3] = raw_address[4].squish
             companies_hash[:address4] = raw_address[5].squish
           end
-          byebug
 
           check = check_existed_company companies_hash
 

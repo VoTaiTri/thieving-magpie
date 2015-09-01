@@ -1,11 +1,11 @@
 class DodaWorker
   include Sidekiq::Worker
-  # include ApplicationHelper
   include DodaHelper
   # sidekiq_options retry: 2
 
   def perform start, finish
     workpage = get_work_page_doda
+    byebug
     lists = get_list_job_link workpage, start, finish
 
     error_counter = 0
@@ -36,7 +36,7 @@ class DodaWorker
           if detail_page.search("div.main_ttl_box h1").present?
             company_name = detail_page.search("div.main_ttl_box h1").text.squish
             companies_hash[:name] = handle_general_text company_name
-            companies_hash[:convert_name] = companies_hash[:name]
+            companies_hash[:convert_name] = convert_company_name companies_hash[:name]
           end
 
           home_tel = parse_home_and_tel detail_page
