@@ -20,10 +20,12 @@ gem "sidekiq", "~> 3.4.2"
 gem "redis-rails", "~> 4.0.0"
 gem "rails_config"
 
-gem 'mojinizer', '~> 0.2.2'
-gem 'itaiji', '~> 0.1.4'
+gem "mojinizer", "~> 0.2.2"
+gem "itaiji", "~> 0.1.4"
 
-gem 'selenium-webdriver', '~> 2.47.1'
+gem "selenium-webdriver", "~> 2.47.1"
+
+gem "tor-privoxy", "~> 0.1.1"
 
 group :development, :test do
   gem "byebug"

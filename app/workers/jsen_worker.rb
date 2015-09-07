@@ -3,9 +3,12 @@ class JsenWorker
   include JsenHelper
 
   def perform start, finish
-    workpage = get_page_by_first_form "http://job.j-sen.jp/"
+    offset = start - 1
+    workpage = get_page_by_form_fake_ip "http://job.j-sen.jp/"
+    # workpage = mechanize_website_fake_ip "http://job.j-sen.jp/search/?s%5Bfreeword%5D=&s%5Bemployment%5D%5B0%5D=permanent&s%5Bemployment%5D%5B1%5D=temporary&page=#{offset}"
     lists = get_list_job_link workpage, start, finish
-    # lists = ["http://job.j-sen.jp/25538/"]
+    # lists = ["http://job.j-sen.jp/hellowork/job_13586011/"]
+    workpage = nil
 
     error_counter = 0
     dem = finish - start + 1
@@ -13,7 +16,7 @@ class JsenWorker
 
     lists.each_with_index do |link, num|
       begin
-        sleep 2
+        sleep 5
         companies_hash = {name: "", postal_code: "", raw_address: "", home_page: "", 
                         address1: "", address2: "", address34: "", address3: "",
                         address4: "", full_tel: "", tel: "", establishment: "",
@@ -46,25 +49,63 @@ class JsenWorker
 
         company_page = detail_page.link_with(text: "企業情報").click
         company_table = parse_company_table company_page
-        companies_hash[:establishment] = company_table[0]
-        companies_hash[:capital] = company_table[1]
-        companies_hash[:employees_number] = company_table[2]
-        companies_hash[:full_address] = company_table[3]
-
-        companies_hash[:url] = company_page.uri.to_s
+        
+        full_address = parse_full_address company_table[3]
+        companies_hash[:full_address] = full_address
 
         if company_page.search("ul.mod-list-inline.employment").present?
           jobs_hash[:inexperience] = 1 if company_page.search("ul.mod-list-inline.employment").text.include? "未経験者歓迎"
         end
 
-        company = Company.new companies_hash
-        job = Job.new jobs_hash
+        if full_address.present?
+          raw_address = parse_final_address full_address
+          companies_hash[:postal_code] = raw_address[0]
+          companies_hash[:address1] = raw_address[1].squish
+          companies_hash[:address2] = raw_address[2].squish
+          # companies_hash[:address34] = raw_address[3].squish
+          companies_hash[:address3] = raw_address[4].squish
+          companies_hash[:address4] = raw_address[5].squish
+        end
 
-        company.save!
+        check = check_existed_company companies_hash
+        if check.present?
+          jobs_hash[:company_id] = check[1]
+          company = Company.find_by id: check[1]
+        else
+          companies_hash[:establishment] = company_table[0]
+          companies_hash[:capital] = company_table[1]
+          companies_hash[:employees_number] = company_table[2]
+          companies_hash[:url] = company_page.uri.to_s
+          company = Company.new companies_hash
+          company.save!
+          jobs_hash[:company_id] = company.id
+        end
+        
+        job = Job.new jobs_hash
         job.save!
+
+        puts "worker #{worker} : thread #{num}"
+      rescue Mechanize::ResponseCodeError => e
+        error_counter += 1
+        write_error_to_file "JsenWorker #{worker} : ", error_counter, e
+        case e.response_code
+        when "404"
+          next
+        when "503"
+        when "502"
+        when "500"
+          retry
+        end
+      rescue Timeout::Error, Errno::ENETUNREACH, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
+        retry
+      rescue SystemCallError
+        error_counter += 1
+        write_error_to_file "JsenWorker Connection-timeout : ", error_counter, e
+        retry
       rescue StandardError => e
         error_counter += 1
         write_error_to_file "work #{worker}::get_data_jsen", error_counter, e
+        retry
       end
     end
   end

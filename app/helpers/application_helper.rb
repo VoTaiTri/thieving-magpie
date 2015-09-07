@@ -2,7 +2,7 @@ module ApplicationHelper
   require "sidekiq/api"
   require "mechanize"
   require "open-uri"
-  require "selenium-webdriver"
+  require "tor-privoxy"
 
   def mechanize_website web_url
     agent = Mechanize.new
@@ -10,8 +10,25 @@ module ApplicationHelper
     agent.get web_url
   end
 
-  def get_page_by_first_form url
-    page = mechanize_website url
+  def mechanize_website_fake_ip web_url
+    agent = Mechanize.new
+    agent.user_agent_alias = "Mac Safari"
+    next_proxy = Settings.list_proxy.sample
+    agent.set_proxy next_proxy[0], next_proxy[1]
+    # agent.retry_change_requests = true
+    # agent.keep_alive = false
+    agent.get web_url
+  end
+
+  def get_page_by_first_form web_url
+    page = mechanize_website web_url
+    form = page.forms.first
+    button = form.buttons.first
+    form.submit button
+  end
+
+  def get_page_by_form_fake_ip web_url
+    page = mechanize_website_fake_ip web_url
     form = page.forms.first
     button = form.buttons.first
     form.submit button
@@ -31,9 +48,10 @@ module ApplicationHelper
 
   def convert_new_line objects
     objects.each do |object|
-      object.content = "\n" if object.name == "br"
-      object.content = object.text.strip + "\n" if object.name == "p"
-      object.content = object.text.strip if Nokogiri::XML::Text == object.class
+      object.content = "\n" if "br" == object.name
+      object.content = object.text.strip + "\n" if "p" == object.name
+      object.content = object.text.squish + "\n" if "text" == object.name
+      convert_new_line object.children if "div" == object.name
     end
   end
 

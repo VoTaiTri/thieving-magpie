@@ -117,7 +117,7 @@ module EcareerHelper
     regx = Settings.regular.address.total
     rebx_ex = Settings.regular.address.address34exception
     if regx.match(raw_address).present?
-      arr = regx.match raw_address
+      arr = regx.match(raw_address).to_a
       address[0] = arr[1] if arr[1].present?
       address[1] = arr[2] if arr[2].present?
       address[2] = arr[3] if arr[3].present?

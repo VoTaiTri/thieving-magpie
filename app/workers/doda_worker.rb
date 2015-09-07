@@ -5,9 +5,8 @@ class DodaWorker
 
   def perform start, finish
     workpage = get_work_page_doda
-    byebug
     lists = get_list_job_link workpage, start, finish
-
+    
     error_counter = 0
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
