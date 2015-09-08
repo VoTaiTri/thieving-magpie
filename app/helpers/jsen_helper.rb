@@ -12,7 +12,6 @@ module JsenHelper
     url = Settings.crawler.jsen.url
     list_page_error = 0
     list_job_link = []
-
     while workpage.search("h2.mod-content-plain-header-title").present?
       begin
         next_link = workpage.search("li.next")[0].children[0].attributes["href"].value
@@ -152,5 +151,13 @@ module JsenHelper
       object.content = object.text.squish if "text" == object.name
     end
     objects.text.strip
+  end
+
+  def get_full_address raw_full_address
+    full_address = raw_full_address
+    if /.*\/([^\/]+)/.match(raw_full_address).present?
+      full_address = /.*\/([^\/]+)/.match(raw_full_address)[1].strip
+    end
+    full_address
   end
 end

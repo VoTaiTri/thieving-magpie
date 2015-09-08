@@ -8,7 +8,7 @@ class JsenWorker
     workpage = mechanize_website_fake_ip "http://job.j-sen.jp/search/?s%5Bfreeword%5D=&s%5Bemployment%5D%5B0%5D=permanent&s%5Bemployment%5D%5B1%5D=temporary&page=#{offset}"
     lists = get_list_job_link workpage, start, finish
     workpage = nil
-    # lists = ["http://job.j-sen.jp/56920/"]
+    # lists = ["http://job.j-sen.jp/23734/"]
 
     error_counter = 0
     dem = finish - start + 1
@@ -54,13 +54,14 @@ class JsenWorker
         company_table = parse_company_table company_page
         
         if jobs_hash[:url].include? "hellowork"
-          full_address = parse_full_address company_table[3]
+          raw_full_address = parse_full_address company_table[3]
         else
-          full_address = parse_full_address work_table[8]
+          raw_full_address = parse_full_address work_table[8]
         end
+        
+        full_address = get_full_address raw_full_address
         companies_hash[:full_address] = full_address
         
-
         if company_page.search("ul.mod-list-inline.employment").present?
           jobs_hash[:inexperience] = 1 if company_page.search("ul.mod-list-inline.employment").text.include? "未経験者歓迎"
         end
@@ -92,13 +93,12 @@ class JsenWorker
         job = Job.new jobs_hash
         job.save!
 
-        puts "worker #{worker} : thread #{num}"
+        puts "worker #{worker} : thread #{num + 1}"
       rescue Mechanize::ResponseCodeError => e
         error_counter += 1
         write_error_to_file "JsenWorker #{worker} : ", error_counter, e
         case e.response_code
         when "404"
-          next
         when "503"
         when "502"
         when "500"
@@ -108,12 +108,12 @@ class JsenWorker
         error_counter += 1
         write_error_to_file "JsenWorker Connect-timeout : ", error_counter, e
         retry
-      # rescue Timeout::Error, Errno::ENETUNREACH, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::ENOPROTOOPT
-      #   retry
-      # rescue SystemCallError
-      #   error_counter += 1
-      #   write_error_to_file "JsenWorker Connection-timeout : ", error_counter, e
-      #   retry
+      rescue Timeout::Error, Errno::ENETUNREACH, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::ENOPROTOOPT
+        retry
+      rescue SystemCallError
+        error_counter += 1
+        write_error_to_file "JsenWorker Connection-timeout : ", error_counter, e
+        retry
       # rescue StandardError => e
       rescue StandardError => e
         error_counter += 1
