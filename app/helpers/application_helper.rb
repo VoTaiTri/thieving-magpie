@@ -15,6 +15,9 @@ module ApplicationHelper
         status = "ok"
         return status
       end
+    rescue Net::HTTPInternalServerError
+      status = "Net::HTTPInternalServerError"
+      return status
     rescue Errno::ECONNREFUSED
       status = "Errno::ECONNREFUSED"
       return status

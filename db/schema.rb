@@ -65,7 +65,7 @@ ActiveRecord::Schema.define(version: 20150827021909) do
     t.datetime "updated_at",                      null: false
   end
 
-  add_index "jobs", ["company_id"], name: "fk_rails_1fcabce865", using: :btree
+  add_index "jobs", ["company_id"], name: "fk_rails_ccf56fe5f7", using: :btree
 
   add_foreign_key "jobs", "companies"
 end

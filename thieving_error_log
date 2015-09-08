@@ -1,0 +1,9 @@
+JsenWorker 1 :  error 1:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/67728/#company -- unhandled response!
+JsenWorker 3 :  error 1:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/32664/#company -- unhandled response!
+JsenWorker 1 :  error 2:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/66966/ -- unhandled response!
+JsenWorker 5 :  error 1:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/hellowork/job_13949909/ -- unhandled response!
+JsenWorker 2 :  error 1:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/27800/ -- unhandled response!
+JsenWorker 4 :  error 1:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/28504/ -- unhandled response!
+JsenWorker 1 :  error 3:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/55396/#company -- unhandled response!
+JsenWorker 5 :  error 2:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/hellowork/job_13949881/#company -- unhandled response!
+JsenWorker 2 :  error 2:  503 => Net::HTTPServiceUnavailable for http://job.j-sen.jp/64310/#company -- unhandled response!

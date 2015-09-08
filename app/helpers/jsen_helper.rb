@@ -12,7 +12,6 @@ module JsenHelper
     url = Settings.crawler.jsen.url
     list_page_error = 0
     list_job_link = []
-
     while workpage.search("h2.mod-content-plain-header-title").present?
       begin
         next_link = workpage.search("li.next")[0].children[0].attributes["href"].value
@@ -21,10 +20,13 @@ module JsenHelper
           workpage = workpage.link_with(href: next_link).click
         elsif next_page >= start_page && next_page <= finish_page
           link_detail = workpage.search("h2.mod-content-plain-header-title")
-          if link_detail.children[5].attributes["href"].present?
-            list_job_link += link_detail.map {|link| url + link.children[5].attributes["href"]}
-          elsif link_detail.children[4].attributes["href"].present?
-            list_job_link += link_detail.map {|link| url + link.children[4].attributes["href"]}
+          link_detail.each do |painate|
+            if painate.children[5].attributes["href"].present?
+              list_job_link += [url + painate.children[5].attributes["href"].value]
+            end
+            if painate.children[4].attributes["href"].present?
+              list_job_link += [url + painate.children[4].attributes["href"].value]
+            end
           end
           workpage = workpage.link_with(href: next_link).click
         else
@@ -152,5 +154,13 @@ module JsenHelper
       object.content = object.text.squish if "text" == object.name
     end
     objects.text.strip
+  end
+
+  def get_full_address raw_full_address
+    full_address = raw_full_address
+    if /.*\/([^\/]+)/.match(raw_full_address).present?
+      full_address = /.*\/([^\/]+)/.match(raw_full_address)[1].strip
+    end
+    full_address
   end
 end
