@@ -19,14 +19,14 @@ default: &default
 
 development:
   <<: *default
-  database: thieving_development
+  database: thieving_mapie1
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
-test:
-  <<: *default
-  database: thieving_test
+# test:
+#   <<: *default
+#   database: thieving_test
 
 # As with config/secrets.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -47,8 +47,8 @@ test:
 #   production:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
-production:
-  <<: *default
-  database: thieving_production
-  username: thieving
-  password: <%= ENV['FELS_DATABASE_PASSWORD'] %>
+# production:
+#   <<: *default
+#   database: thieving_production
+#   username: thieving
+#   password: <%= ENV['FELS_DATABASE_PASSWORD'] %>

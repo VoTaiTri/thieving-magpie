@@ -4,19 +4,19 @@ class JsenWorker
 
   def perform start, finish
     offset = start - 1
-    workpage = get_page_by_form_fake_ip "http://job.j-sen.jp/"
-    # workpage = mechanize_website_fake_ip "http://job.j-sen.jp/search/?s%5Bfreeword%5D=&s%5Bemployment%5D%5B0%5D=permanent&s%5Bemployment%5D%5B1%5D=temporary&page=#{offset}"
+    # workpage = get_page_by_form_fake_ip "http://job.j-sen.jp/"
+    workpage = mechanize_website_fake_ip "http://job.j-sen.jp/search/?s%5Bfreeword%5D=&s%5Bemployment%5D%5B0%5D=permanent&s%5Bemployment%5D%5B1%5D=temporary&page=#{offset}"
     lists = get_list_job_link workpage, start, finish
-    # lists = ["http://job.j-sen.jp/hellowork/job_13586011/"]
     workpage = nil
+    # lists = ["http://job.j-sen.jp/56920/"]
 
     error_counter = 0
     dem = finish - start + 1
-    worker = (start - 1) / dem + 1
+    worker = (start - 1 - 300) / dem + 1
 
     lists.each_with_index do |link, num|
       begin
-        sleep 5
+        sleep 2
         companies_hash = {name: "", postal_code: "", raw_address: "", home_page: "", 
                         address1: "", address2: "", address34: "", address3: "",
                         address4: "", full_tel: "", tel: "", establishment: "",
@@ -32,7 +32,10 @@ class JsenWorker
         jobs_hash[:worker] = worker
 
         detail_page = mechanize_website link
-        companies_hash[:name] = detail_page.search("h1 a.txt-1").text.squish.delete("の転職/求人情報")
+        company_name = detail_page.search("h1 a.txt-1").text.squish.delete("の転職/求人情報")
+
+        companies_hash[:name] = handle_general_text company_name
+        companies_hash[:convert_name] = convert_company_name companies_hash[:name]
         jobs_hash[:title] = detail_page.search("h1 a.txt-2").text.squish
 
         work_table = parse_work_table detail_page
@@ -50,8 +53,13 @@ class JsenWorker
         company_page = detail_page.link_with(text: "企業情報").click
         company_table = parse_company_table company_page
         
-        full_address = parse_full_address company_table[3]
+        if jobs_hash[:url].include? "hellowork"
+          full_address = parse_full_address company_table[3]
+        else
+          full_address = parse_full_address work_table[8]
+        end
         companies_hash[:full_address] = full_address
+        
 
         if company_page.search("ul.mod-list-inline.employment").present?
           jobs_hash[:inexperience] = 1 if company_page.search("ul.mod-list-inline.employment").text.include? "未経験者歓迎"
@@ -96,12 +104,17 @@ class JsenWorker
         when "500"
           retry
         end
-      rescue Timeout::Error, Errno::ENETUNREACH, Errno::EHOSTUNREACH, Errno::ECONNREFUSED
-        retry
-      rescue SystemCallError
+      rescue Errno::ETIMEDOUT
         error_counter += 1
-        write_error_to_file "JsenWorker Connection-timeout : ", error_counter, e
+        write_error_to_file "JsenWorker Connect-timeout : ", error_counter, e
         retry
+      # rescue Timeout::Error, Errno::ENETUNREACH, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::ENOPROTOOPT
+      #   retry
+      # rescue SystemCallError
+      #   error_counter += 1
+      #   write_error_to_file "JsenWorker Connection-timeout : ", error_counter, e
+      #   retry
+      # rescue StandardError => e
       rescue StandardError => e
         error_counter += 1
         write_error_to_file "work #{worker}::get_data_jsen", error_counter, e

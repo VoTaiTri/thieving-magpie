@@ -47,7 +47,7 @@ module JsenHelper
   end
 
   def parse_work_table job_detail_page
-    data = ["", "", "", "", "", "", "", ""]
+    data = ["", "", "", "", "", "", "", "", ""]
     url = job_detail_page.uri.to_s
     job_detail_page.search("div#work table.data-table tr").each do |row|
       if row.search("th").present? && row.search("td").present?
@@ -60,7 +60,9 @@ module JsenHelper
         when Settings.requirement
           data[2] = row.search("td").text.strip.gsub /(\n+)/, "\n"
         when Settings.workplace
-          data[3] = parse_work_place row.search("td")[0].children, url
+          place = parse_work_place row.search("td")[0].children, url
+          data[3] = place[0]
+          data[8] = place[1]
         when Settings.work_time
           data[4] = row.search("td").text.strip.gsub /(\n+)/, "\n"
         when Settings.salary
@@ -86,36 +88,46 @@ module JsenHelper
   end
 
   def parse_work_place objects, web_url
-    work_place = ""
+    place = ["", ""]
     if web_url.include? "hellowork"
       objects.each do |object|
         if Nokogiri::XML::Element == object.class
-          if object.text.strip.include?("郵便番号") || object.text.strip.include?("住所")
-            work_place += object.children[2].text.squish + " "
+          if object.text.strip.include?("勤務地") || object.text.strip.include?("住所")
+            place[0] += object.children[2].text.squish + " "
           end
         end
       end
     else
       objects.each do |object|
         if object.search("div.row").present?
-          object.search("div.row").each do |sub|
-            if Settings.crawler.jsen.workplace == sub.search("div.col-1").text.strip
-              work_place = sub.search("div.col-2 p").first.text.strip
-              break
-            elsif Settings.workplace == sub.search("div.col-1").text.strip
-              work_place = sub.search("div.col-2 p").first.text.strip
-              break
+          if place[0].blank?
+            object.search("div.row").each do |sub|
+              if Settings.workplace == sub.search("div.col-1").text.strip
+                place[0] = sub.search("div.col-2 p").first.text.strip
+                break
+              elsif Settings.crawler.jsen.workplace == sub.search("div.col-1").text.strip && place[0].blank?
+                place[0] = sub.search("div.col-2 p").first.text.strip
+              end
             end
           end
         end
       end
     end
-    work_place
+
+    if objects.search("div.row").present?
+      objects.search("div.row").each do |object|
+        if Settings.crawler.jsen.workplace == object.search("div.col-1").text.strip
+          place[1] = object.search("div.col-2").text.strip.gsub /(\n+)/, "\n"
+        elsif Settings.workplace == object.search("div.col-1").text.strip
+          place[1] = object.search("div.col-2 p").first.text.strip
+        end
+      end
+    end
+    place
   end
 
   def parse_company_table job_detail_page
     data = ["", "", "", "", ""]
-
     job_detail_page.search("div#company table.data-table tr").each do |row|
       if row.search("th").present? && row.search("td").present?
         convert_new_line row.search("td")
@@ -126,8 +138,6 @@ module JsenHelper
           data[1] = row.search("td").text.strip
         when Settings.mechanize.employees_number
           data[2] = row.search("td").text.strip
-        when Settings.crawler.jsen.new_address
-          data[3] = row.search("td").text.strip
         when Settings.crawler.jsen.old_address
           data[3] = parse_old_full_address row.search("td")[0].children
         end

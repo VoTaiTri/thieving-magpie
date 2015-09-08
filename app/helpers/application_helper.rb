@@ -3,7 +3,40 @@ module ApplicationHelper
   require "mechanize"
   require "open-uri"
   require "tor-privoxy"
+  require "timeout"
+  require "socket"
 
+  def ping_proxy_server host, post
+    status = ""
+    begin
+      Timeout.timeout(5) do 
+        s = TCPSocket.new host, post
+        s.close
+        status = "ok"
+        return status
+      end
+    rescue Errno::ECONNREFUSED
+      status = "Errno::ECONNREFUSED"
+      return status
+    rescue Timeout::Error
+      status = "Timeout"
+      return status
+    rescue Errno::ENOPROTOOPT
+      status = "Errno::ENOPROTOOPT"
+      return status
+    rescue Errno::ETIMEDOUT
+      status = "Errno::ETIMEDOUT"
+      return status
+    rescue Mechanize::ResponseCodeError
+      status = "Mechanize::ResponseCodeError"
+      return status
+    rescue Persistent::Error
+      status = "Persistent::Error"
+      return status
+    end
+  end
+
+# , Errno::ENETUNREACH, Errno::EHOSTUNREACH
   def mechanize_website web_url
     agent = Mechanize.new
     agent.user_agent_alias = "Mac Safari"
@@ -14,8 +47,11 @@ module ApplicationHelper
     agent = Mechanize.new
     agent.user_agent_alias = "Mac Safari"
     next_proxy = Settings.list_proxy.sample
+    while ping_proxy_server(next_proxy[0], next_proxy[1]) != "ok"
+      next_proxy = Settings.list_proxy.sample
+    end
     agent.set_proxy next_proxy[0], next_proxy[1]
-    # agent.retry_change_requests = true
+    agent.retry_change_requests = true
     # agent.keep_alive = false
     agent.get web_url
   end
