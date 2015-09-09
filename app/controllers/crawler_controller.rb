@@ -26,8 +26,8 @@ class CrawlerController < ApplicationController
     
     page_per_job = Settings.page_per_job
     Settings.number_worker.times do |i|
-      start_page = page_per_job * i + 1 + 299
-      finish_page = page_per_job * (i + 1) + 299
+      start_page = page_per_job * i + 1
+      finish_page = page_per_job * (i + 1)
       time_sleep = (i + 1) * 0.5
       sleep time_sleep
       if params[:source] == ["green"]

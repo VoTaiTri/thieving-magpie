@@ -55,13 +55,13 @@ class DodaWorker
             full_address = parse_full_address raw_full_address
             companies_hash[:full_address] = full_address
             
-            raw_address = parse_final_address full_address
+            # raw_address = parse_final_address full_address
+            raw_address = parse_final_full_address full_address
             companies_hash[:postal_code] = raw_address[0]
             companies_hash[:address1] = raw_address[1]
             companies_hash[:address2] = raw_address[2]
-            companies_hash[:address34] = raw_address[3]
-            companies_hash[:address3] = raw_address[4]
-            companies_hash[:address4] = raw_address[5]
+            companies_hash[:address3] = raw_address[3]
+            companies_hash[:address4] = raw_address[4]
           end
 
           category = parse_category detail_page 

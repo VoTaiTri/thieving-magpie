@@ -232,9 +232,48 @@ module ApplicationHelper
     final_address
   end
 
+
+  def parse_final_full_address full_address
+    regx_add12 = Settings.regular.address.address1and2
+    final_address = ["", "", "", "", ""]
+    if regx_add12.match(full_address).present?
+      raw_address = regx_add12.match full_address
+
+      raw_postal_code = raw_address[1].to_s.strip
+      final_address[0] = parse_postal_code raw_postal_code if raw_postal_code.present?
+
+      final_address[1] = parse_address1or2 raw_address[2].to_s.strip
+      final_address[2] = parse_address1or2 raw_address[3].to_s.strip
+
+      raw_address34 = raw_address[4].to_s.strip
+      regx_add34 = Settings.regular.address.address3and4
+      regx_add34ex = Settings.regular.address.address34exception
+      if regx_add34ex.match(raw_address34).present?
+        address34 = regx_add34ex.match(raw_address34)
+        final_address[3] = address34[1].to_s.strip
+        final_address[4] = address34[2].to_s.strip
+        byebug
+      else
+        address34 = regx_add34.match(raw_address34)
+        final_address[3] = address34[1].to_s.strip
+        final_address[4] = address34[3].to_s.strip
+      end
+    end
+    final_address
+  end
+
+  def parse_address1or2 raw_address1or2
+    address1or2 = raw_address1or2
+    if /([】\\／＞：])/.match(raw_address1or2).present?
+      address1or2 = /[】\\／＞：].*?[】\\／＞：](.*)$/.match(raw_address1or2)[1].to_s.strip
+    end
+    address1or2
+  end
+
   def parse_postal_code str
+    regx_postal_code = Settings.regular.postal_code
     if str.present?
-      raw_postal_code = str.scan(/〒?([０-９0-9[-－‐]{1}]{8}\s?)/).join("/")
+      raw_postal_code = str.scan(regx_postal_code).join("/")
       str = raw_postal_code.delete("^0-9０-９/")
     end
     str
