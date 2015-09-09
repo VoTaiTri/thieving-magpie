@@ -12,7 +12,7 @@ class JsenWorker
 
     error_counter = 0
     dem = finish - start + 1
-    worker = (start - 1 - 300) / dem + 1
+    worker = (start - 1 - 299) / dem + 1
 
     lists.each_with_index do |link, num|
       begin
@@ -54,6 +54,16 @@ class JsenWorker
         company_table = parse_company_table company_page
         
         if jobs_hash[:url].include? "hellowork"
+<<<<<<< HEAD
+          companies_hash[:raw_address] = parse_full_address company_table[3]
+        else
+          companies_hash[:raw_address] = parse_full_address work_table[8]
+        end
+
+        full_address = get_full_address companies_hash[:raw_address]
+        companies_hash[:full_address] = full_address
+
+=======
           raw_full_address = parse_full_address company_table[3]
         else
           raw_full_address = parse_full_address work_table[8]
@@ -62,6 +72,7 @@ class JsenWorker
         full_address = get_full_address raw_full_address
         companies_hash[:full_address] = full_address
         
+>>>>>>> refactor-parse-address-1
         if company_page.search("ul.mod-list-inline.employment").present?
           jobs_hash[:inexperience] = 1 if company_page.search("ul.mod-list-inline.employment").text.include? "未経験者歓迎"
         end
