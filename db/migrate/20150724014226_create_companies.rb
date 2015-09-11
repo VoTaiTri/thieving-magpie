@@ -25,7 +25,7 @@ class CreateCompanies < ActiveRecord::Migration
       t.string :business_category
       t.string :recruiter
       t.string :email
-      
+      t.integer :n_company_id
       t.timestamps null: false
     end
   end

@@ -60,6 +60,7 @@ class JsenWorker
         end
         
         full_address = get_full_address raw_full_address
+        companies_hash[:raw_address] = raw_full_address
         companies_hash[:full_address] = full_address
         
         if company_page.search("ul.mod-list-inline.employment").present?

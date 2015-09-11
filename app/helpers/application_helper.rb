@@ -54,7 +54,7 @@ module ApplicationHelper
       next_proxy = Settings.list_proxy.sample
     end
     agent.set_proxy next_proxy[0], next_proxy[1]
-    agent.retry_change_requests = true
+    # agent.retry_change_requests = true
     # agent.keep_alive = false
     agent.get web_url
   end
@@ -75,6 +75,11 @@ module ApplicationHelper
 
   def get_page_by_link_text url, text
     page = mechanize_website url
+    page = page.link_with(text: text).click
+  end
+
+  def get_page_by_link_fake_ip url, text
+    page = mechanize_website_fake_ip url
     page = page.link_with(text: text).click
   end
 
@@ -162,6 +167,15 @@ module ApplicationHelper
     str
   end
 
+  def convert_job_title str
+    if str.present?
+      str = str.delete Settings.job_strange
+      str = str.mb_chars.upcase.to_s
+      str = str.katakana
+    end
+    str
+  end
+
   def parse_full_address raw_address
     full_address = ""
     if Settings.regular.address.multiple.e.match(raw_address).present? && Settings.regular.address.multiple.e.match(raw_address)[1].present?
@@ -240,7 +254,7 @@ module ApplicationHelper
       raw_address = regx_add12.match full_address
 
       raw_postal_code = raw_address[1].to_s.strip
-      final_address[0] = parse_postal_code raw_postal_code if raw_postal_code.present?
+      final_address[0] = raw_postal_code.present? ? parse_postal_code(raw_postal_code) : raw_postal_code
 
       final_address[1] = parse_address1or2 raw_address[2].to_s.strip
       final_address[2] = parse_address1or2 raw_address[3].to_s.strip
@@ -252,7 +266,6 @@ module ApplicationHelper
         address34 = regx_add34ex.match(raw_address34)
         final_address[3] = address34[1].to_s.strip
         final_address[4] = address34[2].to_s.strip
-        byebug
       else
         address34 = regx_add34.match(raw_address34)
         final_address[3] = address34[1].to_s.strip
@@ -265,7 +278,7 @@ module ApplicationHelper
   def parse_address1or2 raw_address1or2
     address1or2 = raw_address1or2
     if /([】\\／＞：])/.match(raw_address1or2).present?
-      address1or2 = /[】\\／＞：].*?[】\\／＞：](.*)$/.match(raw_address1or2)[1].to_s.strip
+      address1or2 = /[【＜]?.*?[】\\／＞：](.*)$/.match(raw_address1or2)[1].to_s.strip
     end
     address1or2
   end

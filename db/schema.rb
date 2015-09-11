@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150827021909) do
+ActiveRecord::Schema.define(version: 20150724014233) do
 
   create_table "companies", force: :cascade do |t|
     t.string   "name",              limit: 255
@@ -38,13 +38,14 @@ ActiveRecord::Schema.define(version: 20150827021909) do
     t.string   "business_category", limit: 255
     t.string   "recruiter",         limit: 255
     t.string   "email",             limit: 255
+    t.integer  "n_company_id",      limit: 4
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
-    t.integer  "n_company_id",      limit: 4
   end
 
   create_table "jobs", force: :cascade do |t|
     t.string   "title",             limit: 255
+    t.string   "convert_title",     limit: 255
     t.string   "job_category",      limit: 255
     t.string   "job_type",          limit: 255
     t.string   "business_category", limit: 255
@@ -65,11 +66,7 @@ ActiveRecord::Schema.define(version: 20150827021909) do
     t.datetime "updated_at",                      null: false
   end
 
-<<<<<<< HEAD
-  add_index "jobs", ["company_id"], name: "fk_rails_ccf56fe5f7", using: :btree
-=======
-  add_index "jobs", ["company_id"], name: "fk_rails_6a54262c50", using: :btree
->>>>>>> refactor-parse-address-1
+  add_index "jobs", ["company_id"], name: "fk_rails_3ff31de5e0", using: :btree
 
   add_foreign_key "jobs", "companies"
 end
