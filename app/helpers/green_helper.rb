@@ -86,22 +86,31 @@ module GreenHelper
     content = ""
     dem = -1
     section = job_detail_page.search("div.job-offer-main-content section")[0].children
+    max = section.count
     section.each_with_index do |sect, num|
       if Settings.content == sect.text.strip
         dem = num + 1
         break
       end
     end
-    if -1 == dem
-      byebug
-    else
-      (dem..section.count - 1).each do |i|
-        if "p" == section[i].name
-          convert_new_line section[i].children
-          content = section[i].text.strip.gsub /(\n+)/, "\n"
+
+    if dem != -1
+      (dem..max - 1).each do |i|
+        if "h4" == section[i].name
+          max = i - 1
+          break
         end
       end
+
+      section[dem..max].each do |cont|
+        if Nokogiri::XML::Element == cont.class
+          convert_new_line cont.children
+        end
+      end
+
+      content = section[dem..max].text.strip.gsub /(\n+)/, "\n"
     end
+
     content
   end
 
@@ -141,24 +150,27 @@ module GreenHelper
   end
 
   def parse_work_place objects
+    dem = -1
+    max = objects.count
+    work_place = ""
     if objects.text.strip.include? Settings.crawler.green.address
-      objects.each do |object|
-        if object.text.strip.include? Settings.crawler.green.address
-          objects.delete object
+      objects.each_with_index do |object, num|
+        if !object.text.strip.include?(Settings.crawler.green.address) && /^([【◆].*[】◆]|.*\/)$/.match(object.text.squish).nil? && object.name != "br"
+          dem = num
           break
-        else
-          objects.delete object
         end
       end
 
-      objects.each do |object|
-        if "text" == object.name && object.text.squish.present?
-          work_place = object.text.squish
+      (dem..max - 1).each do |i|
+        if /^([【◆].*[】◆]|.*\/)$/.match(objects[i].text.squish).present?
+          max = i - 1
           break
         end
       end
+      convert_new_line objects[dem..max]
+      work_place = objects[dem..max].text.strip.gsub /(\n+)/, "\n"
     end
-    work_place = work_place.nil? ? "" : work_place
+    work_place
   end
 
   def parse_sales_info objects
@@ -170,5 +182,4 @@ module GreenHelper
     end
     sales = arr.join("\n")
   end
-
 end

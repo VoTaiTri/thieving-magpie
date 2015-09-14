@@ -6,8 +6,13 @@ class GreenWorker
     url = Settings.crawler.green.url
     link_text = Settings.crawler.green.link_text
     workpage = get_page_by_link_text url, link_text
-    # workpage = get_page_by_link_fake_ip url, link_text
     lists = get_list_job_link workpage, start, finish
+    workpage = nil
+
+    # lists = ["http://www.green-japan.com/job/35933",
+    #         "http://www.green-japan.com/job/30748",
+    #         "http://www.green-japan.com/job/25837",
+    #         "http://www.green-japan.com/job/35907"]
 
     error_counter = 0
     dem = finish - start + 1
@@ -33,7 +38,7 @@ class GreenWorker
         companies_hash[:paginate] = link.split("&page=")[1]
         jobs_hash[:paginate] = link.split("&page=")[1]
 
-        if job_link.present?
+        if job_link.present? && !Job.exists?(url: job_link)
           detail_page = mechanize_website job_link
 
           companies_hash[:url] = job_link
@@ -102,7 +107,7 @@ class GreenWorker
                 puts "worker #{worker} : thread #{num + 1} : create new JOB"
               end
 
-              puts "worker #{worker} : thread #{num + 1} : action"
+              puts "worker #{worker} : thread #{num + 1} : do action"
             end
           end
         end

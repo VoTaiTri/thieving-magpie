@@ -90,7 +90,7 @@ html:
   p: "p"
   n: "\n"
 strange: "　＋ー、。，,.･－‐．～：！※＆"
-job_strange: "　＋ー、。，,.･－‐．～：！※＆／・()【】『』「」（）≪≫＜＞[]＼％★◆◎’［”］“■"
+job_strange: "　＋ー、。，,.･－‐．～：！※＆／・()【】『』「」（）≪≫＜＞[]＼％★☆◆〝◎’［”］“■→◇？〜…＠♪―＊"
 bracket: "【】（）「」／＜＞()，≪≫［］『』"
 option_crawler: [["Green", "green"], ["Doda", "doda"], ["Ecareer", "ecareer"], ["J-sen", "jsen"]]
 crawler:

@@ -8,7 +8,6 @@ class DodaWorker
     lists = get_list_job_link workpage, start, finish
     workpage = nil
     
-    error_counter = 0
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
 
@@ -37,7 +36,6 @@ class DodaWorker
 
           if detail_page.search("div.main_ttl_box p").text.squish.present?
             jobs_hash[:convert_title] = convert_job_title handle_general_text jobs_hash[:title]
-            #byebug
 
             if detail_page.search("div.main_ttl_box h1").present?
               #byebug
@@ -140,6 +138,7 @@ class DodaWorker
               job.save!
               puts "worker #{worker} : thread #{num + 1} : create new JOB"
             end
+            puts "worker #{worker} : thread #{num + 1} : action"
           end
           # job_state = detail_page.search("div.main_ttl_box p img") - detail_page.search("div.main_ttl_box p.ico_box01 img")
           # array_state = job_state.map {|state| state["alt"]}

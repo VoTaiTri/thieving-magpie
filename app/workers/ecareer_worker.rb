@@ -109,7 +109,7 @@ class EcareerWorker
               puts "worker #{worker} : thread #{num + 1} : create new JOB"
             end
 
-            puts "worker #{worker} : thread #{num + 1} : action"
+            puts "worker #{worker} : thread #{num + 1} : no action"
           end
         end
       rescue StandardError => e
