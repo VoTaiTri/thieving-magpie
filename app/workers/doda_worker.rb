@@ -7,7 +7,8 @@ class DodaWorker
     workpage = get_work_page_doda
     lists = get_list_job_link workpage, start, finish
     workpage = nil
-    
+    # lists = ["http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001029479/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/"]
+
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
 
@@ -26,10 +27,10 @@ class DodaWorker
 
         companies_hash[:worker] = worker
         jobs_hash[:worker] = worker
-       
+
         job_page = mechanize_website link
         detail_url = get_job_detail_url job_page
-        #byebug
+
         if detail_url.present? && !Job.exists?(url: detail_url)
           detail_page = job_page.link_with(href: detail_url).click
           jobs_hash[:title] = detail_page.search("div.main_ttl_box p").text.squish
@@ -38,13 +39,11 @@ class DodaWorker
             jobs_hash[:convert_title] = convert_job_title handle_general_text jobs_hash[:title]
 
             if detail_page.search("div.main_ttl_box h1").present?
-              #byebug
               company_name = detail_page.search("div.main_ttl_box h1").text.squish
               companies_hash[:name] = handle_general_text company_name
               companies_hash[:convert_name] = convert_company_name companies_hash[:name]
             end
 
-            #byebug
             home_tel = parse_home_and_tel detail_page
             raw_home_page = handle_general_text home_tel[0]
             home_page = convert_home_page raw_home_page
@@ -55,12 +54,10 @@ class DodaWorker
             companies_hash[:full_tel] = full_tel
             companies_hash[:tel] = parse_tel_number full_tel if full_tel.present?
 
-            #byebug
             raw_full_address = parse_left_block detail_page
             companies_hash[:raw_address] = raw_full_address
 
             if raw_full_address.present?
-              #byebug
               full_address = parse_full_address raw_full_address
               companies_hash[:full_address] = full_address
 
@@ -73,12 +70,9 @@ class DodaWorker
               companies_hash[:address4] = raw_address[4]
             end
 
-            #byebug
             category = parse_category detail_page
             jobs_hash[:job_category] = category[0]
             jobs_hash[:business_category] = category[1]
-
-            
 
             check = check_existed_company companies_hash
 
@@ -115,7 +109,6 @@ class DodaWorker
               companies_hash[:employees_number] = right[1]
               companies_hash[:capital] = right[2]
               companies_hash[:sales] = right[3]
-              #byebug
               company = Company.new companies_hash
               company.save!
               puts "worker #{worker} : thread #{num + 1} : create new COMPANY"
