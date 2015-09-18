@@ -178,16 +178,25 @@ module ApplicationHelper
 
   def parse_full_address raw_address
     full_address = ""
-    if Settings.regular.address.multiple.e.match(raw_address).present? && Settings.regular.address.multiple.e.match(raw_address)[1].present?
-      full_address = Settings.regular.address.multiple.e.match(raw_address)[1].to_s.strip
-    elsif Settings.regular.address.multiple.b.match(raw_address).present? && Settings.regular.address.multiple.b.match(raw_address)[1].present?
-      full_address = Settings.regular.address.multiple.b.match(raw_address)[1].to_s.strip
+    regx_multi = Settings.regular.address.multiple.a
+    regx_multi_add1 = Settings.regular.address.multiple.b
+    regx_multi_add2 = Settings.regular.address.multiple.e
+    regx_multi_add3 = Settings.regular.address.multiple.f
+    
+    if regx_multi.match(raw_address).present?
+      full_address = regx_multi.match(raw_address)[1].to_s.strip
+    elsif regx_multi_add3.match(raw_address).present?
+      full_address = regx_multi_add3.match(raw_address)[1].to_s.strip
+    elsif regx_multi_add2.match(raw_address).present?
+      full_address = regx_multi_add2.match(raw_address)[1].to_s.strip
+    elsif regx_multi_add1.match(raw_address).present?
+      full_address = regx_multi_add1.match(raw_address)[1].to_s.strip
     elsif /^.+：(.*)\/.*：/.match(raw_address).present?
-      full_address = /^.+：(.*)\/.*：/.match(raw_address)[1].to_s.strip if /^.+：(.*)\/.*：/.match(raw_address)[1].present?
+      full_address = /^.+：(.*)\/.*：/.match(raw_address)[1].to_s.strip
     else
       full_address = raw_address
     end
-    return full_address
+    return full_address.gsub "　", " "
   end
 
   def parse_final_address full_address
@@ -268,7 +277,6 @@ module ApplicationHelper
       end
     elsif regx_add12.match(full_address).present?
       raw_address = regx_add12.match full_address
-
       raw_postal_code = raw_address[1].to_s.strip
       final_address[0] = raw_postal_code.present? ? parse_postal_code(raw_postal_code) : raw_postal_code
 
@@ -299,15 +307,15 @@ module ApplicationHelper
 
   def parse_address1or2 raw_address1or2
     address1or2 = raw_address1or2
-    if /([】\\／＞：])/.match(raw_address1or2).present?
-      address1or2 = /[【＜]?.*?[】\\／＞：](.*)$/.match(raw_address1or2)[1].to_s.strip
+    if /([】\\／）＞\)：])/.match(raw_address1or2).present?
+      address1or2 = /[【\(＜（]?.*?[】）\\／＞\)：](.*)$/.match(raw_address1or2)[1].to_s.strip
     end
     address1or2
   end
 
   def parse_address4 raw_address4
     if raw_address4.present?
-      raw_address4 = raw_address4.gsub /([\(（【][本支][社店部][】）\)]|[\(（【]総合受付[】）\)]|[\(（【]本店所在地[】）\)])/, ""
+      raw_address4 = raw_address4.gsub /(／\s*[本支][社店部]|\S*[本支][社店部]\s*：|[\(（【]\S*[本支][社店部][】）\)]|[\(（【]総合受付[】）\)]|[\(（【]本店所在地[】）\)])/, ""
       raw_address4 = raw_address4.gsub "階", "Ｆ"
 
       regx_bracket = Settings.regular.address.address4.bracket
@@ -320,7 +328,7 @@ module ApplicationHelper
         end
       end
     end
-    raw_address4
+    raw_address4 = raw_address4.gsub /(^[・／:：]|[／:：]$)/, ""
   end
 
   def parse_tel_number full_tel

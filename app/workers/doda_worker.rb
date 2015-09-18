@@ -7,7 +7,25 @@ class DodaWorker
     workpage = get_work_page_doda
     lists = get_list_job_link workpage, start, finish
     workpage = nil
-    # lists = ["http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001029479/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/"]
+    # lists = ["http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001050648/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001031973/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3000941130/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001030447/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/", # w
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001045982/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001054212/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001049978/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3000917677/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001024028/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001048277/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001049099/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001052738/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001046870/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001035082/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001008098/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/",
+    #         "http://doda.jp/DodaFront/View/JobSearchDetail/j_jid__3001052989/-tab__jd/-fm__jobdetail/-mpsc_sid__10/-tp__1/"]
+            
+
+            
 
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
