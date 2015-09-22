@@ -8,12 +8,7 @@ class GreenWorker
     workpage = get_page_by_link_text url, link_text
     lists = get_list_job_link workpage, start, finish
     workpage = nil
-
-    # lists = ["http://www.green-japan.com/job/35933",
-    #         "http://www.green-japan.com/job/30748",
-    #         "http://www.green-japan.com/job/25837",
-    #         "http://www.green-japan.com/job/35907"]
-
+    
     error_counter = 0
     dem = finish - start + 1
     worker = (start - 1) / dem + 1
@@ -37,11 +32,10 @@ class GreenWorker
         job_link = link.split("&page=")[0]
         companies_hash[:paginate] = link.split("&page=")[1]
         jobs_hash[:paginate] = link.split("&page=")[1]
-
+        
         if job_link.present? && !Job.exists?(url: job_link)
           detail_page = mechanize_website job_link
 
-          companies_hash[:url] = job_link
           jobs_hash[:url] = job_link
 
           jobs_hash[:title] = detail_page.search("div.job-offer-heading__left.no_graph h2").text.strip
@@ -63,6 +57,7 @@ class GreenWorker
 
             if detail_page.link_with(text: "企業詳細").present?
               company_page = detail_page.link_with(text: "企業詳細").click
+              companies_hash[:url] = company_page.uri.to_s.split("?")[0]
               company_table = parse_company_data_table company_page
               companies_hash[:name] = handle_general_text company_table[0]
               companies_hash[:convert_name] = convert_company_name companies_hash[:name]
@@ -71,10 +66,9 @@ class GreenWorker
               companies_hash[:raw_address] = raw_full_address
 
               if raw_full_address.present?
-                full_address = parse_full_address raw_full_address
+                full_address = parse_raw_full_address raw_full_address
                 companies_hash[:full_address] = full_address
                 
-                # raw_address = parse_final_address full_address
                 raw_address = parse_final_full_address full_address
                 companies_hash[:postal_code] = raw_address[0]
                 companies_hash[:address1] = raw_address[1]
@@ -82,7 +76,7 @@ class GreenWorker
                 companies_hash[:address3] = raw_address[3]
                 companies_hash[:address4] = raw_address[4]
               end
-              
+
               check = check_existed_company companies_hash
               if check.present?
                 jobs_hash[:company_id] = check[1]

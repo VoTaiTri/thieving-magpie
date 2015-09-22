@@ -11,7 +11,7 @@ class CrawlerController < ApplicationController
 
   def thieving
     if params[:source] == ["green"]
-      # page_count = get_number_page_green
+      page_count = get_number_page_green
     elsif params[:source] == ["doda"]
       page_count = get_number_page_doda
     elsif params[:source] == ["ecareer"]
@@ -22,10 +22,10 @@ class CrawlerController < ApplicationController
 
     
     worker_num = Settings.number_worker
-    # page = page_count / worker_num
-    # page_per_job = page_count % worker_num == 0? page : page + 1
-    page_per_job = Settings.page_per_job
-    Settings.number_worker.times do |i|
+    page = page_count / worker_num
+    page_per_job = page_count % worker_num == 0? page : page + 1
+    # page_per_job = Settings.page_per_job
+    worker_num.times do |i|
       start_page = page_per_job * i + 1
       finish_page = page_per_job * (i + 1)
       time_sleep = (i + 1) * 0.5

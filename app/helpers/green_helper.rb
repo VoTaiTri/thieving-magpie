@@ -5,7 +5,7 @@ module GreenHelper
   def get_number_page_green
     url = Settings.crawler.green.url
     link_text = Settings.crawler.green.link_text
-    work_page = get_page_by_link_text url, link_text
+    work_page = get_page_by_link_fake_ip url, link_text
     work_page.search("div.pagers a")[-2].text.to_i
   end
 
@@ -116,23 +116,24 @@ module GreenHelper
 
   def parse_company_data_table job_detail_page
     data = ["", "", "", "", "", "", ""]
-    job_detail_page.search("table.tb_com_data tr").each do |row|
-      if row.search("td.l_td").present? && row.search("td.r_td").present?
-        case row.search("td.l_td").text.strip
+    job_detail_page.search("table.detail-content-table tr").each do |row|
+      if row.search("th").present? && row.search("td").present?
+        case row.search("th").text.strip
         when Settings.crawler.green.company_name
-          data[0] = row.search("td.r_td").text.strip
+          data[0] = row.search("td").text.strip
         when Settings.crawler.green.business_category
-          data[1] = parse_business_category row.search("td.r_td")[0]
+          data[1] = parse_business_category row.search("td")[0]
         when Settings.mechanize.capital
-          data[2] = row.search("td.r_td").text.strip
+          data[2] = row.search("td").text.strip
         when Settings.crawler.green.sales
-          data[3] = parse_sales_info row.search("td.r_td tr td")
+          data[3] = parse_sales_info row.search("td tr td")
         when Settings.crawler.green.establishment
-          data[4] = row.search("td.r_td").text.strip
+          data[4] = row.search("td").text.strip
         when Settings.mechanize.employees_number
-          data[5] = row.search("td.r_td").text.strip
+          data[5] = row.search("td").text.strip
         when Settings.crawler.full_address
-          data[6] = row.search("td.r_td").text.squish
+          convert_new_line row.search("td").children
+          data[6] = row.search("td").text.strip.gsub /(\n+)/, "\n"
         end
       end
     end
@@ -181,5 +182,77 @@ module GreenHelper
       arr[x] = objects[x].text.strip + " : " + objects[x + column].text.strip
     end
     sales = arr.join("\n")
+  end
+
+  def parse_raw_full_address raw_address
+    max = 0
+    min = 0
+    raw_full_address = ""
+    regx_address12 = Settings.regular.address.address12
+    regx_total = Settings.regular.address.total
+    raw_arr = raw_address.split "\n"
+
+    if 1 >= raw_arr.count 
+      raw_full_address = raw_arr[0]
+    else
+      raw_arr.each_with_index do |raw, num| 
+        if regx_address12.match(raw).present?
+          add12 = regx_address12.match(raw)
+          if add12[2].present? || add12[3].present?
+            max = num
+            break
+          end
+        end
+      end
+      
+      if max > 0
+        raw_arr[0..max].each_with_index do |raw_full, num|
+          if regx_address12.match(raw_full).present?
+            arr = regx_address12.match raw_full
+            if arr[1].nil? && arr[2].nil? && arr[3].nil? && arr[4].present?
+              min = num + 1
+            else
+              min = num
+              break
+            end
+          end
+        end
+      end
+      
+      raw_arr[min..max].each do |full_add|
+        raw_full_address += full_add
+      end
+      
+      if regx_total.match(raw_full_address) && !regx_total.match(raw_full_address)[5].present?
+        if max < raw_arr.count - 1
+          raw_arr[max + 1..-1].each_with_index do |raw_full, num|
+            if regx_address12.match(raw_full).present?
+              arr = regx_address12.match raw_full
+              if arr[1].nil? && arr[2].nil? && arr[3].nil? && arr[4].present?
+                if /^([\(【［（\[＜][^\(【［（\[＜＞\]）］】\)]+[＞\]）］】\)])/.match(raw_full).nil?
+                  raw_full_address = ""
+                  max = max + 1 + num
+                  raw_arr[min..max].each do |full_add|
+                    raw_full_address += full_add
+                  end
+                  break
+                end
+              else
+                break
+              end
+            end
+          end
+        end
+      end
+      
+      if raw_full_address.blank?
+        raw_full_address = raw_arr[0]
+      end
+    end
+    
+    if raw_full_address.include? "号"
+      raw_full_address.gsub! "号", "号 "
+    end
+    parse_full_address raw_full_address
   end
 end
