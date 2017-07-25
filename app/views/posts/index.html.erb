@@ -1,0 +1,14 @@
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Content</th>
+    <th>Author</th>
+  </tr>
+  <% @posts.each do |post| %>
+    <tr>
+      <td><%= post.id %></td>
+      <td><%= post.content %></td>
+      <td><%= post.author_name %></td>
+    </tr>
+  <% end %>
+</table>
